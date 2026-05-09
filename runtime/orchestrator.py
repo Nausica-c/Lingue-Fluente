@@ -10,10 +10,10 @@ class ArticleOrchestrator:
         self.context_builder = ContextBuilder()
 
         self.context = {}
-        self.generator = SmartGenerator()
+        self.generator = None
 
     # -------------------------
-    # LOAD CONTEXT (SAFE)
+    # LOAD CONTEXT
     # -------------------------
 
     def load_context(self):
@@ -21,23 +21,37 @@ class ArticleOrchestrator:
         print("📦 LOADING CONTEXT...")
 
         try:
-            ctx = self.context_builder.build(self.article_path)
-
-            if not isinstance(ctx, dict):
-                print("⚠️ Context non valido → fallback empty dict")
-                ctx = {}
-
-            self.context = ctx
+            self.context = self.context_builder.build(self.article_path)
 
         except Exception as e:
-            print(f"⚠️ Context error → fallback: {e}")
+            print(f"⚠️ Context build error: {e}")
             self.context = {}
 
-        print("📄 CONTEXT READY")
+        if not isinstance(self.context, dict):
+            self.context = {}
+
+        print("📄 CONTEXT LOADED (SAFE MODE)")
+
         return self.context
 
     # -------------------------
-    # PROMPT BUILDER (SAFE)
+    # INIT GENERATOR
+    # -------------------------
+
+    def init_generator(self):
+
+        print("🤖 INIT SMART GENERATOR...")
+
+        try:
+            self.generator = SmartGenerator()
+        except Exception as e:
+            print(f"❌ Generator init failed: {e}")
+            self.generator = None
+
+        return self.generator
+
+    # -------------------------
+    # PROMPT
     # -------------------------
 
     def build_prompt(self):
@@ -46,30 +60,47 @@ class ArticleOrchestrator:
         cluster = self.context.get("cluster", {}).get("config", {})
         prompts = self.context.get("prompts", {})
 
-        keyword = article.get("seo", {}).get("primary_keyword", "inglese")
+        primary_keyword = article.get("seo", {}).get("primary_keyword", "lingua inglese")
+
+        brand_voice = prompts.get("prompts", {}).get("global", {}).get(
+            "brand_voice", "Chiaro e semplice"
+        )
+
+        writing_style = prompts.get("prompts", {}).get("global", {}).get(
+            "writing_style", "SEO base"
+        )
 
         return f"""
-Sei un content writer SEO per Lingue-Fluente.
+Sei un copywriter SEO per Lingue-Fluente.
+
+BRAND:
+{brand_voice}
+
+STILE:
+{writing_style}
 
 CLUSTER:
-{cluster.get('description', 'apprendimento lingue')}
+{cluster.get('description', '')}
 
 KEYWORD:
-{keyword}
+{primary_keyword}
 
-REGOLE:
+ISTRUZIONI:
 - Italiano semplice
-- Struttura H2/H3
+- Struttura con H2 e H3
 - Esempi pratici
-- SEO ottimizzato
-- Tono umano
+- Nessuna ripetizione
+- Ottimizzato SEO
+
+CTA:
+Inserisci Babbel in modo naturale.
 
 OUTPUT:
-Articolo completo HTML pronto per blog.
+Articolo completo.
 """
 
     # -------------------------
-    # GENERATE (ROBUST MODE)
+    # GENERATE (STABILE + FALLBACK)
     # -------------------------
 
     def generate_article(self):
@@ -81,52 +112,54 @@ Articolo completo HTML pronto per blog.
         article = ""
 
         try:
-            article = self.generator.generate(prompt)
+            if self.generator and hasattr(self.generator, "generate"):
+                article = self.generator.generate(prompt)
         except Exception as e:
             print(f"⚠️ AI ERROR: {e}")
 
-        article = str(article or "").strip()
+        # normalizzazione
+        if article:
+            article = str(article).strip()
 
-        # 🔥 GUARANTEED FALLBACK (ZERO FAILURE MODE)
-        if len(article) < 200:
+        # 🔥 FALLBACK ASSOLUTO (NON SI BLOCCA MAI)
+        if not article or len(article) < 200:
 
-            print("🧱 USING GUARANTEED FALLBACK")
+            print("🧱 USING SAFE FALLBACK")
 
-            title = self.context.get("article", {}).get("meta", {}).get(
-                "title", "Imparare le lingue"
-            )
+            title = self.context.get("article", {}).get("meta", {}).get("title", "Articolo")
 
             article = f"""
 <h1>{title}</h1>
 
-<p>Questo articolo è stato generato in modalità stabile del sistema Lingue-Fluente.</p>
+<p>Questo articolo è stato generato in modalità fallback.</p>
 
 <h2>Introduzione</h2>
-<p>Imparare una lingua richiede costanza, esposizione e pratica quotidiana.</p>
+<p>Imparare una lingua richiede pratica costante e metodo.</p>
 
-<h2>Metodo pratico</h2>
-<p>Usa esempi reali, ripetizione e immersione nel contesto.</p>
+<h2>Consiglio pratico</h2>
+<p>Usa contenuti quotidiani e ripetizione attiva.</p>
 
-<h2>Consiglio</h2>
-<p>Strumenti come Babbel possono aiutare a strutturare il percorso.</p>
+<h2>Strumento consigliato</h2>
+<p>Babbel può aiutarti a strutturare lo studio in modo efficace.</p>
 """
 
-        print(f"📏 FINAL ARTICLE LENGTH: {len(article)}")
+        print(f"📏 FINAL LENGTH: {len(article)}")
 
         return article
 
     # -------------------------
-    # RUN PIPELINE
+    # RUN
     # -------------------------
 
     def run(self):
 
-        print("🚀 ORCHESTRATOR START")
+        print("🚀 START ORCHESTRATOR")
 
         self.load_context()
+        self.init_generator()
 
-        article = self.generate_article()
+        result = self.generate_article()
 
-        print("✅ ORCHESTRATOR DONE")
+        print("✅ DONE")
 
-        return article
+        return result
