@@ -10,7 +10,7 @@ class ContentPlanner:
 
         self.keyword_engine = KeywordEngine()
 
-        # peso dei cluster (più alto = più pubblicato)
+        # cluster coerenti
         self.cluster_weights = {
             "beginner": 10,
             "metodo": 9,
@@ -21,7 +21,7 @@ class ContentPlanner:
             "viaggio": 7,
             "grammatica_pratica": 8,
             "errori": 7,
-            "curiosita": 5,
+            "curiosita": 5,   # FIX: coerente lowercase
             "lifelong-learner": 6
         }
 
@@ -37,6 +37,18 @@ class ContentPlanner:
         return random.choices(clusters, weights=weights, k=1)[0]
 
     # -------------------------
+    # FALLBACK IDEA (CRITICO)
+    # -------------------------
+
+    def fallback_idea(self, cluster):
+
+        return {
+            "keyword": f"imparare {cluster} inglese",
+            "title": f"Come migliorare il tuo {cluster} in inglese",
+            "slug": f"imparare-{cluster}-inglese"
+        }
+
+    # -------------------------
     # CREA SCHEDA ARTICOLO
     # -------------------------
 
@@ -46,29 +58,21 @@ class ContentPlanner:
 
         idea = self.keyword_engine.generate_idea(cluster)
 
+        # 🔥 FIX: fallback obbligatorio
         if not idea:
-            return None
+            print(f"⚠️ KeywordEngine vuoto per {cluster} → fallback attivo")
+            idea = self.fallback_idea(cluster)
 
-        # data pubblicazione simulata
         publish_date = datetime.now() + timedelta(days=random.randint(0, 3))
 
-        plan = {
-
+        return {
             "publish_date": publish_date.strftime("%Y-%m-%d"),
-
             "cluster": cluster,
-
             "keyword": idea["keyword"],
-
             "title": idea["title"],
-
             "slug": idea["slug"],
-
             "priority": self.cluster_weights.get(cluster, 5)
-
         }
-
-        return plan
 
     # -------------------------
     # GENERA CALENDARIO
@@ -82,10 +86,9 @@ class ContentPlanner:
 
             plan = self.create_plan()
 
-            if plan:
-                plans.append(plan)
+            # 🔥 NON PUÒ MAI ESSERE SKIPPATO
+            plans.append(plan)
 
-        # ordina per data
         plans.sort(key=lambda x: x["publish_date"])
 
         return plans
