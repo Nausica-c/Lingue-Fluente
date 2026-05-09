@@ -1,0 +1,50 @@
+offers:
+
+  babbel:
+
+    enabled: true
+
+    brand: "Babbel"
+
+    tracking_url: "INSERISCI-LINK-AFFILIATE"
+
+    default_cta: "Inizia a parlare una nuova lingua con Babbel"
+
+    cta_variants:
+      - "Prova Babbel e inizia subito"
+      - "Impara una lingua 15 minuti al giorno"
+      - "Allenati ogni giorno con Babbel"
+      - "Inizia oggi il tuo percorso fluente"
+      - "Migliora il tuo inglese con lezioni pratiche"
+
+    placement:
+      top: true
+      middle: true
+      bottom: true
+
+    supported_clusters:
+      - "beginner"
+      - "metodo"
+      - "mindset"
+      - "vocabolario"
+      - "business"
+      - "viaggio"
+      - "grammatica_pratica"
+      - "speaking"
+      - "errori"
+      - "curiosita"
+      - "lifelong-learner"
+
+    style:
+      button_color: "#f97316"
+      text_color: "#ffffff"
+
+    tracking:
+      enabled: true
+
+      event_name: "babbel_click"
+
+      utm:
+        source: "lingue-fluente"
+        medium: "affiliate"
+        campaign: "babbel"
