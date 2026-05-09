@@ -1,50 +1,219 @@
-offers:
+prompts:
 
-  babbel:
+  global:
 
-    enabled: true
+    brand_voice: >
+      Fluente, semplice, motivazionale e pratica.
+      Gli articoli devono sembrare una guida amichevole,
+      non una lezione scolastica.
 
-    brand: "Babbel"
+    writing_style: >
+      Frasi brevi.
+      Linguaggio chiaro.
+      Tono umano.
+      Evitare linguaggio troppo tecnico.
+      Alternare spiegazioni, esempi e mini motivazione.
 
-    tracking_url: "INSERISCI-LINK-AFFILIATE"
+    formatting_rules:
+      - "usa molti H2"
+      - "usa liste"
+      - "usa paragrafi brevi"
+      - "evidenzia concetti importanti"
+      - "scrivi in modo mobile-friendly"
 
-    default_cta: "Inizia a parlare una nuova lingua con Babbel"
+    seo_rules:
+      - "inserisci keyword principale nel titolo"
+      - "usa keyword nel primo paragrafo"
+      - "usa keyword semanticamente correlate"
+      - "ottimizza per featured snippets"
+      - "usa sottotitoli descrittivi"
 
-    cta_variants:
-      - "Prova Babbel e inizia subito"
-      - "Impara una lingua 15 minuti al giorno"
-      - "Allenati ogni giorno con Babbel"
-      - "Inizia oggi il tuo percorso fluente"
-      - "Migliora il tuo inglese con lezioni pratiche"
+    affiliate_rules:
+      - "inserisci CTA naturali"
+      - "non essere aggressivo"
+      - "presenta Babbel come strumento pratico"
+      - "collega Babbel alla soluzione del problema"
 
-    placement:
-      top: true
-      middle: true
-      bottom: true
+    pinterest_rules:
+      - "crea hook emozionali"
+      - "usa titoli curiosi"
+      - "ottimizza per click"
+      - "scrivi pensando a Pinterest mobile"
 
-    supported_clusters:
-      - "beginner"
-      - "metodo"
-      - "mindset"
-      - "vocabolario"
-      - "business"
-      - "viaggio"
-      - "grammatica_pratica"
-      - "speaking"
-      - "errori"
-      - "curiosita"
-      - "lifelong-learner"
+  article_structure:
 
-    style:
-      button_color: "#f97316"
-      text_color: "#ffffff"
+    order:
+      - "intro"
+      - "problem"
+      - "solution"
+      - "examples"
+      - "daily_routine"
+      - "mistakes"
+      - "faq"
+      - "cta"
 
-    tracking:
-      enabled: true
+    intro:
+      goal: >
+        Agganciare il lettore immediatamente.
 
-      event_name: "babbel_click"
+      style:
+        - "inizia con un problema"
+        - "usa una domanda"
+        - "prometti una soluzione semplice"
 
-      utm:
-        source: "lingue-fluente"
-        medium: "affiliate"
-        campaign: "babbel"
+    problem:
+      goal: >
+        Far sentire il lettore compreso.
+
+    solution:
+      goal: >
+        Spiegare il metodo in modo semplice e pratico.
+
+    examples:
+      goal: >
+        Mostrare esempi concreti e realistici.
+
+    daily_routine:
+      goal: >
+        Dare una mini routine applicabile subito.
+
+    mistakes:
+      goal: >
+        Mostrare errori comuni da evitare.
+
+    faq:
+      goal: >
+        Rispondere alle domande frequenti SEO.
+
+    cta:
+      goal: >
+        Spingere il lettore a iniziare subito.
+
+  clusters:
+
+    beginner:
+
+      tone: >
+        Rassicurante e semplice.
+
+      focus:
+        - "iniziare senza paura"
+        - "piccoli progressi"
+        - "abitudine quotidiana"
+
+    metodo:
+
+      tone: >
+        Motivazionale e pratico.
+
+      focus:
+        - "velocità"
+        - "efficienza"
+        - "metodi moderni"
+
+    mindset:
+
+      tone: >
+        Empatico e motivazionale.
+
+      focus:
+        - "costanza"
+        - "fiducia"
+        - "mentalità"
+
+    vocabolario:
+
+      tone: >
+        Pratico e immediato.
+
+      focus:
+        - "parole utili"
+        - "frasi reali"
+        - "memorizzazione"
+
+    business:
+
+      tone: >
+        Professionale ma semplice.
+
+      focus:
+        - "inglese lavoro"
+        - "email"
+        - "meeting"
+
+    viaggio:
+
+      tone: >
+        Leggero e utile.
+
+      focus:
+        - "situazioni reali"
+        - "frasi da viaggio"
+        - "sopravvivenza linguistica"
+
+    grammatica_pratica:
+
+      tone: >
+        Chiaro e non scolastico.
+
+      focus:
+        - "grammatica utile"
+        - "esempi pratici"
+        - "parlare meglio"
+
+    speaking:
+
+      tone: >
+        Energico e incoraggiante.
+
+      focus:
+        - "fluidità"
+        - "pronuncia"
+        - "fiducia nel parlare"
+
+    errori:
+
+      tone: >
+        Educativo ma amichevole.
+
+      focus:
+        - "errori comuni"
+        - "correzione pratica"
+        - "italianismi"
+
+    curiosita:
+
+      tone: >
+        Curioso e divertente.
+
+      focus:
+        - "fatti sorprendenti"
+        - "cultura"
+        - "lingue nel mondo"
+
+    lifelong-learner:
+
+      tone: >
+        Ispirazionale.
+
+      focus:
+        - "crescita continua"
+        - "imparare per tutta la vita"
+        - "miglioramento personale"
+
+  cta_templates:
+
+    soft:
+      - "Se vuoi allenarti ogni giorno in modo pratico, puoi provare Babbel."
+      - "Uno strumento utile per fare pratica quotidiana è Babbel."
+      - "Molti studenti usano Babbel per creare una routine semplice."
+
+    motivational:
+      - "La cosa importante è iniziare oggi, anche solo 15 minuti."
+      - "Piccoli progressi quotidiani creano vera fluidità."
+      - "La costanza vale più della perfezione."
+
+    action:
+      - "Prova Babbel e inizia subito."
+      - "Inizia oggi il tuo percorso fluente."
+      - "Allenati ogni giorno con lezioni pratiche."
