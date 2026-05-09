@@ -31,12 +31,13 @@ jobs:
         run: |
           pip install pyyaml requests
 
-      # 4. 🔥 AUTOPILOT (MANCAVA)
+      # 4. 🔥 AUTOPILOT (FIX IMPORT CRITICO)
       - name: Run Autopilot
         run: |
+          export PYTHONPATH=$PWD
           python automation/autopilot/autopilot_runner.py
 
-      # 5. DEBUG POSTS (CRITICO)
+      # 5. DEBUG POSTS
       - name: Debug _posts
         run: |
           echo "=== POSTS ==="
@@ -45,6 +46,7 @@ jobs:
       # 6. BUILD SITE
       - name: Build site
         run: |
+          export PYTHONPATH=$PWD
           python scripts/build_site.py
 
       # 7. DEBUG OUTPUT
