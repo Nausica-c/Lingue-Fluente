@@ -1,13 +1,18 @@
+import os
 import requests
 
 
 class GeminiGenerator:
 
-    def __init__(self, model="gemini-2.5-pro"):
+    def __init__(self, model="gemini-1.5-flash"):
+
         self.model = model
 
-        # qui metterai la tua API key
-        self.api_key = "INSERISCI_API_KEY"
+        # 🔥 LEGGE LA KEY DA ENV (GitHub Secrets)
+        self.api_key = os.getenv("GEMINI_API_KEY")
+
+        if not self.api_key:
+            raise Exception("❌ GEMINI_API_KEY non trovata nelle environment variables")
 
         self.endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent"
 
@@ -41,7 +46,8 @@ class GeminiGenerator:
             self.endpoint,
             headers=headers,
             params=params,
-            json=payload
+            json=payload,
+            timeout=60
         )
 
         if response.status_code != 200:
@@ -52,10 +58,10 @@ class GeminiGenerator:
         try:
             return data["candidates"][0]["content"]["parts"][0]["text"]
         except Exception:
-            raise Exception("Risposta Gemini non valida o vuota")
+            raise Exception(f"Risposta Gemini non valida: {data}")
 
     # -------------------------
-    # OPTIONAL: DEBUG
+    # DEBUG TEST
     # -------------------------
 
     def test(self):
