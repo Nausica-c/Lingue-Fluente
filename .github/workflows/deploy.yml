@@ -29,34 +29,33 @@ jobs:
         with:
           python-version: "3.11"
 
-      # 3. 📦 SET PYTHONPATH (FIX IMPORT AUTOMATION)
+      # 3. SET PYTHONPATH
       - name: Set PYTHONPATH
-        run: |
-          echo "PYTHONPATH=$PWD" >> $GITHUB_ENV
+        run: echo "PYTHONPATH=$PWD" >> $GITHUB_ENV
 
       # 4. INSTALL DIPENDENZE
       - name: Install dependencies
         run: |
           pip install requests pyyaml python-frontmatter
 
-      # 5. 🧠 AUTOPILOT (GENERA ARTICOLI)
+      # 5. 🧠 AUTOPILOT
       - name: Run Autopilot
         run: |
           python automation/autopilot/autopilot_runner.py
 
-      # 6. 🏗️ COSTRUISCI IL SITO
+      # 6. 🏗️ BUILD SITE
       - name: Build site
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           python scripts/build_site.py
 
-          # 6.5 GENERA INDEX
+      # 6.5 GENERATE INDEX (FIXED STEP)
       - name: Generate index page
         run: |
           python scripts/generate_index.py
 
-      # 7. DEBUG (VEDI SE FILE ESISTONO)
+      # 7. DEBUG OUTPUT
       - name: Debug output
         run: |
           echo "=== ROOT ==="
@@ -66,7 +65,7 @@ jobs:
           echo "=== SITE ==="
           ls -R _site || echo "_site non trovato"
 
-      # 8. 🌍 DEPLOY SU GITHUB PAGES
+      # 8. DEPLOY
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
         with:
