@@ -1,0 +1,42 @@
+name: Build & Deploy Lingue-Fluente
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # 1. PRENDI IL CODICE
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. SETUP PYTHON
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # 3. INSTALL DIPENDENZE
+      - name: Install dependencies
+        run: |
+          pip install requests pyyaml python-frontmatter
+
+      # 4. COSTRUISCI IL SITO
+      - name: Build site
+        run: |
+          python scripts/build_site.py
+
+      # 5. DEPLOY SU GITHUB PAGES
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_site
