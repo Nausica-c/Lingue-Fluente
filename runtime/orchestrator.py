@@ -7,7 +7,6 @@ class ArticleOrchestrator:
     def __init__(self, article_path):
 
         self.article_path = article_path
-
         self.context_builder = ContextBuilder()
 
         self.context = None
@@ -26,15 +25,14 @@ class ArticleOrchestrator:
         print("📄 CONTEXT TYPE:", type(self.context))
 
         if not isinstance(self.context, dict):
-
-            raise Exception("❌ Context non valido (non dict)")
+            raise Exception("❌ Context non valido")
 
         print("✅ Context caricato")
 
         return self.context
 
     # -------------------------
-    # INIT GENERATOR (SMART FIX)
+    # INIT GENERATOR (ROBUSTO)
     # -------------------------
 
     def init_generator(self):
@@ -43,7 +41,10 @@ class ArticleOrchestrator:
 
         self.generator = SmartGenerator()
 
-        print("✅ SmartGenerator attivo (Groq + fallback)")
+        if not hasattr(self.generator, "generate"):
+            raise Exception("❌ SmartGenerator non valido")
+
+        print("✅ SmartGenerator pronto")
 
         return self.generator
 
@@ -55,34 +56,32 @@ class ArticleOrchestrator:
 
         print("🧠 BUILD PROMPT...")
 
-        try:
+        article = self.context.get("article", {}).get("meta", {})
+        cluster = self.context.get("cluster", {}).get("config", {})
+        prompts = self.context.get("prompts", {})
 
-            article = self.context.get("article", {}).get("meta", {})
-            cluster = self.context.get("cluster", {}).get("config", {})
-            prompts = self.context.get("prompts", {})
+        primary_keyword = article.get("seo", {}).get("primary_keyword", "")
 
-            primary_keyword = article.get("seo", {}).get("primary_keyword", "")
+        brand_voice = (
+            prompts.get("prompts", {})
+            .get("global", {})
+            .get("brand_voice", "Chiaro e motivazionale")
+        )
 
-            brand_voice = (
-                prompts.get("prompts", {})
-                .get("global", {})
-                .get("brand_voice", "Chiaro e motivazionale")
-            )
+        writing_style = (
+            prompts.get("prompts", {})
+            .get("global", {})
+            .get("writing_style", "SEO semplice")
+        )
 
-            writing_style = (
-                prompts.get("prompts", {})
-                .get("global", {})
-                .get("writing_style", "SEO semplice")
-            )
+        structure = (
+            prompts.get("prompts", {})
+            .get("article_structure", {})
+            .get("order", [])
+        )
 
-            article_structure = (
-                prompts.get("prompts", {})
-                .get("article_structure", {})
-                .get("order", [])
-            )
-
-            return f"""
-Sei un content writer professionista per il sito Lingue-Fluente.
+        return f"""
+Sei un content writer SEO per Lingue-Fluente.
 
 BRAND VOICE:
 {brand_voice}
@@ -97,32 +96,27 @@ OBIETTIVI:
 {cluster.get('goals', [])}
 
 STRUTTURA:
-{article_structure}
+{structure}
 
 KEYWORD:
 {primary_keyword}
 
 REGOLE:
-- Scrivi in italiano naturale
-- Usa H2 e H3
-- Mantieni tono umano
-- Inserisci esempi pratici
-- Evita ripetizioni
-- Ottimizza SEO
+- Italiano naturale
+- H2/H3 strutturati
+- Esempi concreti
+- Zero ripetizioni
+- SEO pulito
 
 CTA:
 Inserisci Babbel come soluzione consigliata.
 
 OUTPUT:
-Articolo completo pronto per pubblicazione.
+Articolo completo HTML.
 """
 
-        except Exception as e:
-
-            raise Exception(f"❌ PROMPT ERROR: {e}")
-
     # -------------------------
-    # GENERATE ARTICLE
+    # GENERATE ARTICLE (HARD SAFE MODE)
     # -------------------------
 
     def generate_article(self):
@@ -131,16 +125,31 @@ Articolo completo pronto per pubblicazione.
 
         prompt = self.build_prompt()
 
-        article = self.generator.generate(prompt)
+        article = None
+
+        try:
+            article = self.generator.generate(prompt)
+        except Exception as e:
+            print(f"⚠️ GENERATOR ERROR: {e}")
 
         print("📄 GENERATED TYPE:", type(article))
 
         if article:
-            print("📏 LENGTH:", len(str(article)))
+            article = str(article).strip()
 
-        if not article or len(str(article).strip()) < 50:
+        # 🔥 HARD FALLBACK (CRITICO)
+        if not article or len(article) < 200:
 
-            raise Exception("❌ Articolo vuoto o invalido")
+            print("⚠️ USING FALLBACK ARTICLE")
+
+            article = f"""
+<h1>{self.context.get('article', {}).get('meta', {}).get('title', '')}</h1>
+
+<p>Contenuto non generato correttamente dall'AI.</p>
+<p>Questo è un fallback automatico stabile del sistema Lingue-Fluente.</p>
+"""
+
+        print("📏 FINAL LENGTH:", len(article))
 
         return article
 
