@@ -4,7 +4,7 @@ import yaml
 class SiteBuilder:
 
     def __init__(self):
-        self.root = Path.cwd()
+        self.root = Path(__file__).resolve().parent.parent
         self.posts = self.root / "_posts"
         self.site = self.root / "_site"
 
