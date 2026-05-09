@@ -1,0 +1,198 @@
+clusters:
+
+  beginner:
+    label: "Beginner"
+
+    description: >
+      Contenuti per chi parte da zero.
+
+    target:
+      - "principianti"
+      - "A1"
+      - "A2"
+
+    goals:
+      - "iniziare"
+      - "capire le basi"
+      - "costruire abitudine"
+
+    links_to:
+      - "metodo"
+      - "vocabolario"
+      - "mindset"
+
+  metodo:
+    label: "Metodo"
+
+    description: >
+      Strategie e tecniche per imparare più velocemente.
+
+    target:
+      - "studenti"
+      - "autodidatti"
+
+    goals:
+      - "accelerare apprendimento"
+      - "diventare fluenti"
+
+    links_to:
+      - "beginner"
+      - "mindset"
+      - "speaking"
+
+  mindset:
+    label: "Mindset"
+
+    description: >
+      Motivazione, costanza e psicologia dell'apprendimento.
+
+    target:
+      - "studenti bloccati"
+      - "persone demotivate"
+
+    goals:
+      - "mantenere costanza"
+      - "evitare burnout"
+
+    links_to:
+      - "metodo"
+      - "lifelong-learner"
+
+  vocabolario:
+    label: "Vocabolario"
+
+    description: >
+      Parole utili, frasi e memorizzazione lessicale.
+
+    target:
+      - "A1"
+      - "A2"
+      - "B1"
+
+    goals:
+      - "parlare meglio"
+      - "capire più parole"
+
+    links_to:
+      - "beginner"
+      - "speaking"
+
+  business:
+    label: "Business"
+
+    description: >
+      Inglese professionale e linguaggio lavorativo.
+
+    target:
+      - "professionisti"
+      - "remote workers"
+
+    goals:
+      - "inglese lavoro"
+      - "email"
+      - "meeting"
+
+    links_to:
+      - "speaking"
+      - "vocabolario"
+
+  viaggio:
+    label: "Viaggio"
+
+    description: >
+      Frasi e situazioni utili per viaggiare.
+
+    target:
+      - "turisti"
+      - "viaggiatori"
+
+    goals:
+      - "comunicare all'estero"
+
+    links_to:
+      - "beginner"
+      - "speaking"
+
+  grammatica_pratica:
+    label: "Grammatica pratica"
+
+    description: >
+      Grammatica semplice e applicata alla conversazione.
+
+    target:
+      - "A1"
+      - "B1"
+
+    goals:
+      - "parlare correttamente"
+
+    links_to:
+      - "speaking"
+      - "errori"
+
+  speaking:
+    label: "Speaking"
+
+    description: >
+      Conversazione, pronuncia e fluidità.
+
+    target:
+      - "studenti"
+      - "intermedi"
+
+    goals:
+      - "parlare fluentemente"
+
+    links_to:
+      - "vocabolario"
+      - "grammatica_pratica"
+
+  errori:
+    label: "Errori"
+
+    description: >
+      Errori comuni e come evitarli.
+
+    target:
+      - "studenti italiani"
+
+    goals:
+      - "correggere errori"
+
+    links_to:
+      - "grammatica_pratica"
+      - "speaking"
+
+  curiosita:
+    label: "Curiosità"
+
+    description: >
+      Fatti interessanti sulle lingue e culture.
+
+    target:
+      - "lettori casual"
+
+    goals:
+      - "intrattenere"
+      - "coinvolgere"
+
+    links_to:
+      - "mindset"
+      - "lifelong-learner"
+
+  lifelong-learner:
+    label: "Lifelong Learner"
+
+    description: >
+      Crescita continua e apprendimento permanente.
+
+    target:
+      - "persone curiose"
+      - "self improvement"
+
+    goals:
+      - "imparare continuamente"
+
+    links_to:
+      - "mindset"
+      - "metodo"
