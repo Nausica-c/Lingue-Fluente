@@ -1,4 +1,5 @@
 import random
+import re
 from datetime import datetime, timedelta
 
 from automation.autopilot.keyword_engine import KeywordEngine
@@ -10,7 +11,6 @@ class ContentPlanner:
 
         self.keyword_engine = KeywordEngine()
 
-        # cluster coerenti
         self.cluster_weights = {
             "beginner": 10,
             "metodo": 9,
@@ -21,12 +21,12 @@ class ContentPlanner:
             "viaggio": 7,
             "grammatica_pratica": 8,
             "errori": 7,
-            "curiosita": 5,   # FIX: coerente lowercase
+            "curiosita": 5,
             "lifelong-learner": 6
         }
 
     # -------------------------
-    # SCEGLIE CLUSTER
+    # CLUSTER
     # -------------------------
 
     def pick_cluster(self):
@@ -37,19 +37,32 @@ class ContentPlanner:
         return random.choices(clusters, weights=weights, k=1)[0]
 
     # -------------------------
-    # FALLBACK IDEA (CRITICO)
+    # SAFE SLUG
+    # -------------------------
+
+    def safe_slug(self, text):
+
+        text = text.lower()
+        text = re.sub(r"[^a-z0-9\s-]", "", text)
+        text = re.sub(r"\s+", "-", text)
+        return text.strip("-")
+
+    # -------------------------
+    # FALLBACK
     # -------------------------
 
     def fallback_idea(self, cluster):
 
+        keyword = f"imparare {cluster} inglese"
+
         return {
-            "keyword": f"imparare {cluster} inglese",
+            "keyword": keyword,
             "title": f"Come migliorare il tuo {cluster} in inglese",
-            "slug": f"imparare-{cluster}-inglese"
+            "slug": self.safe_slug(keyword)
         }
 
     # -------------------------
-    # CREA SCHEDA ARTICOLO
+    # CREATE PLAN
     # -------------------------
 
     def create_plan(self):
@@ -58,10 +71,12 @@ class ContentPlanner:
 
         idea = self.keyword_engine.generate_idea(cluster)
 
-        # 🔥 FIX: fallback obbligatorio
         if not idea:
-            print(f"⚠️ KeywordEngine vuoto per {cluster} → fallback attivo")
+            print(f"⚠️ fallback attivo per {cluster}")
             idea = self.fallback_idea(cluster)
+
+        # 🔥 FIX slug sempre sicuro
+        slug = self.safe_slug(idea["slug"])
 
         publish_date = datetime.now() + timedelta(days=random.randint(0, 3))
 
@@ -70,24 +85,32 @@ class ContentPlanner:
             "cluster": cluster,
             "keyword": idea["keyword"],
             "title": idea["title"],
-            "slug": idea["slug"],
+            "slug": slug,
             "priority": self.cluster_weights.get(cluster, 5)
         }
 
     # -------------------------
-    # GENERA CALENDARIO
+    # BATCH (NO DUPLICATI)
     # -------------------------
 
     def generate_batch_plan(self, count=5):
 
         plans = []
+        seen = set()
 
-        for _ in range(count):
+        attempts = 0
+
+        while len(plans) < count and attempts < count * 3:
 
             plan = self.create_plan()
 
-            # 🔥 NON PUÒ MAI ESSERE SKIPPATO
-            plans.append(plan)
+            slug = plan["slug"]
+
+            if slug not in seen:
+                seen.add(slug)
+                plans.append(plan)
+
+            attempts += 1
 
         plans.sort(key=lambda x: x["publish_date"])
 
