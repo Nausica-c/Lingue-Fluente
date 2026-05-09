@@ -29,28 +29,37 @@ jobs:
         with:
           python-version: "3.11"
 
-      # 3. INSTALL DIPENDENZE
+      # 3. 📦 SET PYTHONPATH (FIX IMPORT AUTOMATION)
+      - name: Set PYTHONPATH
+        run: |
+          echo "PYTHONPATH=$PWD" >> $GITHUB_ENV
+
+      # 4. INSTALL DIPENDENZE
       - name: Install dependencies
         run: |
           pip install requests pyyaml python-frontmatter
 
-      # 4. 🧠 AUTOPILOT (GENERA ARTICOLI)
+      # 5. 🧠 AUTOPILOT (GENERA ARTICOLI)
       - name: Run Autopilot
         run: |
           python automation/autopilot/autopilot_runner.py
 
-      # 5. 🏗️ COSTRUISCI IL SITO
+      # 6. 🏗️ COSTRUISCI IL SITO
       - name: Build site
         run: |
           python scripts/build_site.py
 
-      # 6. DEBUG (VEDI SE FILE ESISTONO)
+      # 7. DEBUG (VEDI SE FILE ESISTONO)
       - name: Debug output
         run: |
+          echo "=== ROOT ==="
+          ls -R
+          echo "=== POSTS ==="
           ls -R _posts || echo "_posts non trovato"
+          echo "=== SITE ==="
           ls -R _site || echo "_site non trovato"
 
-      # 7. 🌍 DEPLOY SU GITHUB PAGES
+      # 8. 🌍 DEPLOY SU GITHUB PAGES
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
         with:
