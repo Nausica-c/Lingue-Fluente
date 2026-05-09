@@ -1,5 +1,6 @@
 print("🔥 AUTOPILOT STARTED")
 
+import os
 from automation.autopilot.content_planner import ContentPlanner
 from automation.autopilot.frontmatter_generator import FrontmatterGenerator
 
@@ -36,18 +37,24 @@ class AutopilotRunner:
             }
 
         try:
+
             file_path = self.generator.create_file(plan)
 
-            print(f"📄 FILE CREATED: {file_path}")
+            # 🔥 FIX: verifica reale file
+            if file_path and os.path.exists(file_path):
+                print(f"📄 FILE CREATED: {file_path}")
+            else:
+                print(f"❌ FILE NOT FOUND AFTER CREATION: {file_path}")
 
             return file_path
 
         except Exception as e:
+
             print(f"❌ ERROR CREATING FILE: {e}")
             return None
 
     # -------------------------
-    # BATCH (STABILE)
+    # BATCH (STABILE DEFINITIVO)
     # -------------------------
 
     def run_batch(self, count=5):
@@ -61,33 +68,22 @@ class AutopilotRunner:
             print("❌ NO PLANS GENERATED")
             return []
 
-        # 🔥 FIX DUPLICATI
-        seen = set()
-        clean_plans = []
+        print(f"📦 PLANS RECEIVED: {len(plans)}")
 
-        for p in plans:
-            slug = p.get("slug")
+        # 🔥 IMPORTANTE: NON rifare dedup qui (già fatto nel planner)
+        files = self.generator.generate_batch(plans)
 
-            if slug and slug not in seen:
-                seen.add(slug)
-                clean_plans.append(p)
-
-        print(f"📦 CLEAN PLANS: {len(clean_plans)}")
-
-        files = self.generator.generate_batch(clean_plans)
-
-        # 🔥 VERIFICA REALE
-        print("🔍 VERIFYING FILES...")
+        print("🔍 VERIFYING FILES ON DISK...")
 
         valid_files = []
 
         for f in files:
-            try:
-                import os
-                if os.path.exists(f):
-                    valid_files.append(f)
-            except:
-                pass
+
+            if f and os.path.exists(f):
+                valid_files.append(f)
+                print(f"✅ VALID: {f}")
+            else:
+                print(f"❌ MISSING: {f}")
 
         print(f"🏁 VALID FILES: {len(valid_files)}")
 
@@ -102,4 +98,6 @@ if __name__ == "__main__":
 
     autopilot = AutopilotRunner()
 
-    autopilot.run_batch(5)
+    result = autopilot.run_batch(5)
+
+    print("📊 FINAL RESULT:", len(result))
