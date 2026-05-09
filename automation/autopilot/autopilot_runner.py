@@ -23,9 +23,17 @@ class AutopilotRunner:
 
         plan = self.planner.create_plan()
 
+        print("📦 PLAN:", plan)
+
         if not plan:
-            print("⚠️ Nessun piano generato")
-            return None
+            print("⚠️ Nessun piano generato → fallback attivo")
+
+            plan = {
+                "title": "Come imparare una lingua velocemente",
+                "slug": "imparare-lingua-velocemente",
+                "cluster": "metodo",
+                "keyword": "imparare una lingua velocemente"
+            }
 
         file_path = self.generator.create_file(plan)
 
@@ -41,9 +49,32 @@ class AutopilotRunner:
 
         print(f"🤖 AUTOPILOT: avvio batch da {count} articoli...")
 
+        # 1. genera piani
         plans = self.planner.generate_batch_plan(count)
 
+        print("📦 PLANS GENERATI:", plans)
+
+        # 2. fallback se vuoto
+        if not plans:
+            print("⚠️ Nessun plan generato → fallback attivo")
+
+            plans = [
+                {
+                    "title": "Come imparare una lingua velocemente",
+                    "slug": "imparare-lingua-velocemente",
+                    "cluster": "metodo",
+                    "keyword": "imparare una lingua velocemente"
+                }
+            ]
+
+        # 3. genera file
         files = self.generator.generate_batch(plans)
+
+        print("📄 FILE GENERATI:", files)
+
+        if not files:
+            print("❌ ERRORE: nessun file creato")
+            return []
 
         for f in files:
             print(f"✅ Creato: {f}")
@@ -61,5 +92,4 @@ if __name__ == "__main__":
 
     autopilot = AutopilotRunner()
 
-    # puoi scegliere:
     autopilot.run_batch(5)
