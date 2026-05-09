@@ -1,7 +1,8 @@
 import sys
 from pathlib import Path
 
-ROOT_DIR = Path(__file__).resolve().parent.parent
+# 🔥 ROOT ROBUSTO (GitHub Actions SAFE)
+ROOT_DIR = Path.cwd()
 sys.path.append(str(ROOT_DIR))
 
 from runtime.orchestrator import ArticleOrchestrator
@@ -11,13 +12,17 @@ class SiteBuilder:
 
     def __init__(self):
 
-        # 🔥 FIX: repo root stabile
-        self.base_dir = Path(__file__).resolve().parent.parent
+        # 🔥 usa working directory reale di Actions
+        self.base_dir = Path.cwd()
 
         self.posts_path = self.base_dir / "_posts"
         self.output_path = self.base_dir / "_site"
 
         self.output_path.mkdir(parents=True, exist_ok=True)
+
+        print(f"📍 BASE DIR: {self.base_dir}")
+        print(f"📁 POSTS PATH: {self.posts_path}")
+        print(f"📁 SITE PATH: {self.output_path}")
 
     # -------------------------
     # GET ARTICLES
@@ -25,17 +30,21 @@ class SiteBuilder:
 
     def get_articles(self):
 
-        print(f"📁 CHECK POSTS DIR: {self.posts_path}")
+        print("🔍 CHECKING _posts CONTENTS...")
 
         if not self.posts_path.exists():
-            print("❌ _posts non esiste")
+            print("❌ _posts NON ESISTE")
             return []
 
-        articles = list(self.posts_path.glob("*.md"))
+        files = list(self.posts_path.glob("*.md"))
 
-        print(f"📦 Articoli trovati: {len(articles)}")
+        print(f"📦 FILES FOUND: {len(files)}")
 
-        return articles
+        # 🔥 DEBUG REALE
+        for f in files:
+            print(f" - {f.name}")
+
+        return files
 
     # -------------------------
     # BUILD ARTICLE
@@ -43,32 +52,29 @@ class SiteBuilder:
 
     def build_article(self, article_path):
 
-        print(f"✍️ Generazione: {article_path.name}")
+        print(f"✍️ BUILDING: {article_path.name}")
 
         orchestrator = ArticleOrchestrator(article_path)
 
         content = orchestrator.run()
 
-        # 🔥 FIX: blocca output vuoto
-        if not content or len(content.strip()) < 50:
-            print(f"❌ CONTENUTO NON VALIDO: {article_path.name}")
+        if not content:
+            print(f"❌ EMPTY CONTENT: {article_path.name}")
             return None
 
         return content
 
     # -------------------------
-    # SAVE OUTPUT (HTML FIX)
+    # SAVE OUTPUT
     # -------------------------
 
     def save_article(self, article_path, content):
 
-        # 🔥 FIX IMPORTANTE: HTML invece di MD
         output_file = self.output_path / (article_path.stem + ".html")
 
-        with open(output_file, "w", encoding="utf-8") as f:
-            f.write(content)
+        output_file.write_text(content, encoding="utf-8")
 
-        print(f"✅ Salvato: {output_file}")
+        print(f"✅ SAVED: {output_file}")
 
     # -------------------------
     # BUILD SITE
@@ -76,12 +82,12 @@ class SiteBuilder:
 
     def build(self):
 
-        print("🚀 Avvio build sito Lingue-Fluente...")
+        print("🚀 START BUILD")
 
         articles = self.get_articles()
 
-        if not articles:
-            print("❌ NESSUN ARTICOLO → PIPELINE BLOCCATA")
+        if len(articles) == 0:
+            print("❌ NO ARTICLES FOUND → STOP")
             return
 
         built = 0
@@ -99,6 +105,6 @@ class SiteBuilder:
 
             except Exception as e:
 
-                print(f"❌ Errore su {article.name}: {e}")
+                print(f"❌ ERROR {article.name}: {e}")
 
-        print(f"🏁 BUILD COMPLETATA → articoli generati: {built}")
+        print(f"🏁 DONE → {built} articles built")
