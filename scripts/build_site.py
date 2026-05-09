@@ -8,6 +8,10 @@ class SiteBuilder:
         self.posts = self.root / "_posts"
         self.site = self.root / "_site"
 
+        print("📍 ROOT:", self.root)
+        print("📁 POSTS PATH:", self.posts)
+        print("📦 EXISTS:", self.posts.exists())
+
         self.site.mkdir(exist_ok=True)
 
     # -------------------------
