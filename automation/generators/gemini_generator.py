@@ -4,48 +4,33 @@ import requests
 
 class GeminiGenerator:
 
-    def __init__(self, model="gemini-1.5-flash"):
+    def __init__(self, model="gemini-1.5-pro"):
 
         self.model = model
 
-        # 🔥 LEGGE LA KEY DA ENV (GitHub Secrets)
         self.api_key = os.getenv("GEMINI_API_KEY")
 
         if not self.api_key:
-            raise Exception("❌ GEMINI_API_KEY non trovata nelle environment variables")
+            raise Exception("❌ GEMINI_API_KEY mancante")
 
-        self.endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent"
-
-    # -------------------------
-    # CALL AI
-    # -------------------------
+        self.endpoint = (
+            f"https://generativelanguage.googleapis.com/v1/"
+            f"models/{self.model}:generateContent"
+        )
 
     def generate(self, prompt):
-
-        headers = {
-            "Content-Type": "application/json"
-        }
-
-        params = {
-            "key": self.api_key
-        }
 
         payload = {
             "contents": [
                 {
-                    "parts": [
-                        {
-                            "text": prompt
-                        }
-                    ]
+                    "parts": [{"text": prompt}]
                 }
             ]
         }
 
         response = requests.post(
             self.endpoint,
-            headers=headers,
-            params=params,
+            params={"key": self.api_key},
             json=payload,
             timeout=60
         )
@@ -55,14 +40,4 @@ class GeminiGenerator:
 
         data = response.json()
 
-        try:
-            return data["candidates"][0]["content"]["parts"][0]["text"]
-        except Exception:
-            raise Exception(f"Risposta Gemini non valida: {data}")
-
-    # -------------------------
-    # DEBUG TEST
-    # -------------------------
-
-    def test(self):
-        return self.generate("Scrivi una frase semplice per imparare inglese.")
+        return data["candidates"][0]["content"]["parts"][0]["text"]
