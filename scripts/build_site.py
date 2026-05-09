@@ -1,8 +1,8 @@
 import sys
 from pathlib import Path
 
-# 🔥 ROOT ROBUSTO (GitHub Actions SAFE)
-ROOT_DIR = Path.cwd()
+# 🔥 ROOT STABILE PER GITHUB ACTIONS
+ROOT_DIR = Path.cwd().resolve()
 sys.path.append(str(ROOT_DIR))
 
 from runtime.orchestrator import ArticleOrchestrator
@@ -12,13 +12,16 @@ class SiteBuilder:
 
     def __init__(self):
 
-        # 🔥 usa working directory reale di Actions
-        self.base_dir = Path.cwd()
+        # 🔥 DIRECTORY PRINCIPALI
+        self.base_dir = ROOT_DIR
 
         self.posts_path = self.base_dir / "_posts"
         self.output_path = self.base_dir / "_site"
 
+        # 🔥 CREA _site SEMPRE
         self.output_path.mkdir(parents=True, exist_ok=True)
+
+        print("🚀 SITE BUILDER INIT")
 
         print(f"📍 BASE DIR: {self.base_dir}")
         print(f"📁 POSTS PATH: {self.posts_path}")
@@ -33,36 +36,51 @@ class SiteBuilder:
         print("🔍 CHECKING _posts CONTENTS...")
 
         if not self.posts_path.exists():
+
             print("❌ _posts NON ESISTE")
             return []
 
-        files = list(self.posts_path.glob("*.md"))
+        articles = list(self.posts_path.glob("*.md"))
 
-        print(f"📦 FILES FOUND: {len(files)}")
+        print(f"📦 FILES FOUND: {len(articles)}")
 
-        # 🔥 DEBUG REALE
-        for f in files:
-            print(f" - {f.name}")
+        for article in articles:
+            print(f" - {article.name}")
 
-        return files
+        return articles
 
     # -------------------------
-    # BUILD ARTICLE
+    # BUILD SINGLE ARTICLE
     # -------------------------
 
     def build_article(self, article_path):
 
-        print(f"✍️ BUILDING: {article_path.name}")
+        print(f"\n✍️ BUILDING ARTICLE: {article_path.name}")
 
-        orchestrator = ArticleOrchestrator(article_path)
+        try:
 
-        content = orchestrator.run()
+            orchestrator = ArticleOrchestrator(article_path)
 
-        if not content:
-            print(f"❌ EMPTY CONTENT: {article_path.name}")
+            content = orchestrator.run()
+
+            # 🔥 DEBUG CONTENUTO
+            print("📄 CONTENT TYPE:", type(content))
+
+            if content:
+
+                print("📏 CONTENT LENGTH:", len(str(content)))
+
+            else:
+
+                print("❌ CONTENT IS EMPTY")
+                return None
+
+            return content
+
+        except Exception as e:
+
+            print(f"❌ BUILD ARTICLE ERROR: {e}")
             return None
-
-        return content
 
     # -------------------------
     # SAVE OUTPUT
@@ -70,41 +88,76 @@ class SiteBuilder:
 
     def save_article(self, article_path, content):
 
-        output_file = self.output_path / (article_path.stem + ".html")
+        try:
 
-        output_file.write_text(content, encoding="utf-8")
+            output_file = self.output_path / f"{article_path.stem}.html"
 
-        print(f"✅ SAVED: {output_file}")
+            output_file.write_text(str(content), encoding="utf-8")
+
+            print(f"✅ SAVED: {output_file}")
+
+            return output_file
+
+        except Exception as e:
+
+            print(f"❌ SAVE ERROR: {e}")
+            return None
 
     # -------------------------
-    # BUILD SITE
+    # BUILD FULL SITE
     # -------------------------
 
     def build(self):
 
-        print("🚀 START BUILD")
+        print("\n🚀 START BUILD")
 
         articles = self.get_articles()
 
-        if len(articles) == 0:
-            print("❌ NO ARTICLES FOUND → STOP")
+        if not articles:
+
+            print("❌ NO ARTICLES FOUND")
             return
 
         built = 0
 
         for article in articles:
 
-            try:
+            content = self.build_article(article)
 
-                content = self.build_article(article)
+            if not content:
 
-                if content:
+                print(f"⚠️ SKIPPED: {article.name}")
+                continue
 
-                    self.save_article(article, content)
-                    built += 1
+            saved = self.save_article(article, content)
 
-            except Exception as e:
+            if saved:
+                built += 1
 
-                print(f"❌ ERROR {article.name}: {e}")
+        print("\n🏁 BUILD FINISHED")
+        print(f"✅ ARTICLES BUILT: {built}")
 
-        print(f"🏁 DONE → {built} articles built")
+        # 🔥 DEBUG FINALE
+        print("\n📂 FINAL _site CONTENTS:")
+
+        files = list(self.output_path.glob("*"))
+
+        if not files:
+
+            print("❌ _site È VUOTA")
+
+        else:
+
+            for f in files:
+                print(f" - {f.name}")
+
+
+# -------------------------
+# ENTRYPOINT
+# -------------------------
+
+if __name__ == "__main__":
+
+    builder = SiteBuilder()
+
+    builder.build()
