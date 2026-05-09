@@ -4,7 +4,7 @@ import requests
 
 class GeminiGenerator:
 
-    def __init__(self, model="gemini-1.5-pro"):
+    def __init__(self, model="gemini-pro"):
 
         self.model = model
 
@@ -14,7 +14,7 @@ class GeminiGenerator:
             raise Exception("❌ GEMINI_API_KEY mancante")
 
         self.endpoint = (
-            f"https://generativelanguage.googleapis.com/v1/"
+            f"https://generativelanguage.googleapis.com/v1beta/"
             f"models/{self.model}:generateContent"
         )
 
