@@ -4,7 +4,7 @@ import requests
 
 class GeminiGenerator:
 
-    def __init__(self, model="gemini-pro"):
+    def __init__(self, model="gemini-1.0-pro"):
 
         self.model = model
 
