@@ -1,5 +1,5 @@
 from runtime.context_builder import ContextBuilder
-from automation.generators.local_seo_generator import LocalSEOGenerator
+from automation.generators.smart_generator import SmartGenerator
 
 
 class ArticleOrchestrator:
@@ -13,7 +13,7 @@ class ArticleOrchestrator:
         self.generator = None
 
     # -------------------------
-    # LOAD CONTEXT
+    # LOAD CONTEXT (SAFE)
     # -------------------------
 
     def load_context(self):
@@ -23,11 +23,11 @@ class ArticleOrchestrator:
         try:
             self.context = self.context_builder.build(self.article_path)
 
-        except Exception as e:
-            print(f"⚠️ Context build error: {e}")
-            self.context = {}
+            if not isinstance(self.context, dict):
+                self.context = {}
 
-        if not isinstance(self.context, dict):
+        except Exception as e:
+            print(f"⚠️ Context error: {e}")
             self.context = {}
 
         print("📄 CONTEXT LOADED (SAFE MODE)")
@@ -35,7 +35,7 @@ class ArticleOrchestrator:
         return self.context
 
     # -------------------------
-    # INIT GENERATOR
+    # INIT GENERATOR (ROBUSTO)
     # -------------------------
 
     def init_generator(self):
@@ -60,7 +60,7 @@ class ArticleOrchestrator:
         cluster = self.context.get("cluster", {}).get("config", {})
         prompts = self.context.get("prompts", {})
 
-        primary_keyword = article.get("seo", {}).get("primary_keyword", "lingua inglese")
+        primary_keyword = article.get("seo", {}).get("primary_keyword", "inglese")
 
         brand_voice = prompts.get("prompts", {}).get("global", {}).get(
             "brand_voice", "Chiaro e semplice"
@@ -87,20 +87,20 @@ KEYWORD:
 
 ISTRUZIONI:
 - Italiano semplice
-- Struttura con H2 e H3
+- H2 e H3 chiari
 - Esempi pratici
-- Nessuna ripetizione
-- Ottimizzato SEO
+- Zero ripetizioni
+- SEO ottimizzato
 
 CTA:
 Inserisci Babbel in modo naturale.
 
 OUTPUT:
-Articolo completo.
+Articolo completo HTML.
 """
 
     # -------------------------
-    # GENERATE (STABILE + FALLBACK)
+    # GENERATE (BULLETPROOF)
     # -------------------------
 
     def generate_article(self):
@@ -111,36 +111,39 @@ Articolo completo.
 
         article = ""
 
+        # AI CALL SAFE
         try:
             if self.generator and hasattr(self.generator, "generate"):
                 article = self.generator.generate(prompt)
         except Exception as e:
             print(f"⚠️ AI ERROR: {e}")
 
-        # normalizzazione
+        # normalize
         if article:
             article = str(article).strip()
 
-        # 🔥 FALLBACK ASSOLUTO (NON SI BLOCCA MAI)
+        # 🔥 HARD FALLBACK (NON SI ROMPE MAI)
         if not article or len(article) < 200:
 
             print("🧱 USING SAFE FALLBACK")
 
-            title = self.context.get("article", {}).get("meta", {}).get("title", "Articolo")
+            title = self.context.get("article", {}).get("meta", {}).get(
+                "title", "Articolo Lingue-Fluente"
+            )
 
             article = f"""
 <h1>{title}</h1>
 
-<p>Questo articolo è stato generato in modalità fallback.</p>
+<p>Contenuto generato in modalità fallback stabile.</p>
 
 <h2>Introduzione</h2>
-<p>Imparare una lingua richiede pratica costante e metodo.</p>
+<p>Imparare una lingua richiede costanza e metodo.</p>
 
-<h2>Consiglio pratico</h2>
-<p>Usa contenuti quotidiani e ripetizione attiva.</p>
+<h2>Metodo semplice</h2>
+<p>Usa pratica quotidiana invece di teoria infinita.</p>
 
-<h2>Strumento consigliato</h2>
-<p>Babbel può aiutarti a strutturare lo studio in modo efficace.</p>
+<h2>Consiglio</h2>
+<p>Babbel può aiutarti a seguire un percorso strutturato.</p>
 """
 
         print(f"📏 FINAL LENGTH: {len(article)}")
@@ -148,7 +151,7 @@ Articolo completo.
         return article
 
     # -------------------------
-    # RUN
+    # RUN PIPELINE
     # -------------------------
 
     def run(self):
