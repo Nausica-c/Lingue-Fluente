@@ -26,19 +26,18 @@ class ContentPlanner:
         }
 
     # -------------------------
-    # CLUSTER PICK
+    # CLUSTER PICK (SAFE)
     # -------------------------
 
     def pick_cluster(self):
 
-        return random.choices(
-            list(self.cluster_weights.keys()),
-            weights=self.cluster_weights.values(),
-            k=1
-        )[0]
+        clusters = list(self.cluster_weights.keys())
+        weights = list(self.cluster_weights.values())
+
+        return random.choices(clusters, weights=weights, k=1)[0]
 
     # -------------------------
-    # SAFE SLUG (ROBUSTO)
+    # SLUG SAFE (FINAL VERSION)
     # -------------------------
 
     def safe_slug(self, text):
@@ -46,15 +45,17 @@ class ContentPlanner:
         if not text:
             return "no-slug"
 
-        text = text.lower().strip()
+        text = str(text).lower().strip()
         text = re.sub(r"[^a-z0-9\s-]", "", text)
         text = re.sub(r"\s+", "-", text)
         text = re.sub(r"-+", "-", text)
 
-        return text.strip("-") or "no-slug"
+        slug = text.strip("-")
+
+        return slug if slug else "no-slug"
 
     # -------------------------
-    # FALLBACK IDEA (ROBUSTO)
+    # FALLBACK IDEA
     # -------------------------
 
     def fallback_idea(self, cluster):
@@ -68,26 +69,26 @@ class ContentPlanner:
         }
 
     # -------------------------
-    # CREATE PLAN
+    # CREATE PLAN (HARD SAFE)
     # -------------------------
 
     def create_plan(self):
 
         cluster = self.pick_cluster()
 
-        idea = self.keyword_engine.generate_idea(cluster)
+        idea = {}
 
-        # 🔥 FIX: fallback totale se engine fallisce
-        if not idea or not isinstance(idea, dict):
-            print(f"⚠️ KeywordEngine fallback: {cluster}")
+        try:
+            idea = self.keyword_engine.generate_idea(cluster)
+        except Exception:
+            idea = None
+
+        if not isinstance(idea, dict) or not idea:
             idea = self.fallback_idea(cluster)
 
-        # 🔥 FIX: protezione campi mancanti
-        keyword = idea.get("keyword", "imparare inglese")
-        title = idea.get("title", f"Guida su {keyword}")
-        slug_raw = idea.get("slug", keyword)
-
-        slug = self.safe_slug(slug_raw)
+        keyword = str(idea.get("keyword", "imparare inglese"))
+        title = str(idea.get("title", f"Guida su {keyword}"))
+        slug = self.safe_slug(idea.get("slug", keyword))
 
         publish_date = datetime.now() + timedelta(days=random.randint(0, 3))
 
@@ -101,7 +102,7 @@ class ContentPlanner:
         }
 
     # -------------------------
-    # BATCH PLAN (ANTI DUPLICATI + SAFE)
+    # BATCH PLAN (ROBUSTO DEFINITIVO)
     # -------------------------
 
     def generate_batch_plan(self, count=5):
@@ -109,8 +110,8 @@ class ContentPlanner:
         plans = []
         seen = set()
 
-        attempts = 0
         max_attempts = count * 5
+        attempts = 0
 
         while len(plans) < count and attempts < max_attempts:
 
@@ -128,10 +129,10 @@ class ContentPlanner:
 
             attempts += 1
 
-        # fallback finale se troppo pochi
-        if len(plans) == 0:
-            plans.append(self.create_plan())
+        # fallback assoluto
+        if not plans:
+            plans = [self.create_plan()]
 
-        plans.sort(key=lambda x: x["publish_date"])
+        plans.sort(key=lambda x: x.get("publish_date", ""))
 
         return plans
