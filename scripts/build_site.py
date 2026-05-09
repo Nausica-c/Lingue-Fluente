@@ -1,31 +1,31 @@
 import sys
 from pathlib import Path
 
-# 🧠 ROOT STABILE
 ROOT_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(ROOT_DIR))
 
 from runtime.orchestrator import ArticleOrchestrator
 
 
-POSTS_DIR = Path("_posts")
-OUTPUT_DIR = Path("_site")
-
-
 class SiteBuilder:
 
     def __init__(self):
 
-        self.posts_path = POSTS_DIR
-        self.output_path = OUTPUT_DIR
+        # 🔥 FIX: repo root stabile
+        self.base_dir = Path(__file__).resolve().parent.parent
 
-        self.output_path.mkdir(exist_ok=True)
+        self.posts_path = self.base_dir / "_posts"
+        self.output_path = self.base_dir / "_site"
+
+        self.output_path.mkdir(parents=True, exist_ok=True)
 
     # -------------------------
-    # GET ALL ARTICLES (FIXED)
+    # GET ARTICLES
     # -------------------------
 
     def get_articles(self):
+
+        print(f"📁 CHECK POSTS DIR: {self.posts_path}")
 
         if not self.posts_path.exists():
             print("❌ _posts non esiste")
@@ -38,7 +38,7 @@ class SiteBuilder:
         return articles
 
     # -------------------------
-    # BUILD SINGLE ARTICLE
+    # BUILD ARTICLE
     # -------------------------
 
     def build_article(self, article_path):
@@ -49,20 +49,21 @@ class SiteBuilder:
 
         content = orchestrator.run()
 
-        # 🔥 FIX CRITICO
-        if not content:
-            print(f"❌ CONTENUTO VUOTO: {article_path.name}")
+        # 🔥 FIX: blocca output vuoto
+        if not content or len(content.strip()) < 50:
+            print(f"❌ CONTENUTO NON VALIDO: {article_path.name}")
             return None
 
         return content
 
     # -------------------------
-    # SAVE OUTPUT
+    # SAVE OUTPUT (HTML FIX)
     # -------------------------
 
     def save_article(self, article_path, content):
 
-        output_file = self.output_path / article_path.name
+        # 🔥 FIX IMPORTANTE: HTML invece di MD
+        output_file = self.output_path / (article_path.stem + ".html")
 
         with open(output_file, "w", encoding="utf-8") as f:
             f.write(content)
@@ -70,7 +71,7 @@ class SiteBuilder:
         print(f"✅ Salvato: {output_file}")
 
     # -------------------------
-    # BUILD ALL SITE
+    # BUILD SITE
     # -------------------------
 
     def build(self):
@@ -80,7 +81,7 @@ class SiteBuilder:
         articles = self.get_articles()
 
         if not articles:
-            print("⚠️ Nessun articolo trovato")
+            print("❌ NESSUN ARTICOLO → PIPELINE BLOCCATA")
             return
 
         built = 0
@@ -100,14 +101,4 @@ class SiteBuilder:
 
                 print(f"❌ Errore su {article.name}: {e}")
 
-        print(f"🏁 Build completata! Articoli generati: {built}")
-
-
-# -------------------------
-# RUN
-# -------------------------
-
-if __name__ == "__main__":
-
-    builder = SiteBuilder()
-    builder.build()
+        print(f"🏁 BUILD COMPLETATA → articoli generati: {built}")
