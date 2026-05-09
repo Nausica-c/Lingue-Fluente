@@ -45,7 +45,7 @@ class ArticleOrchestrator:
         # 🔥 FIX DEFINITIVO
         # bypass pipeline config mancante
         provider = "gemini"
-        model = "gemini-1.5-flash"
+        model = "gemini-1.0-pro"
 
         print(f"📡 PROVIDER: {provider}")
         print(f"🧠 MODEL: {model}")
