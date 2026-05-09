@@ -1,16 +1,13 @@
-name: Build & Deploy Lingue-Fluente
+name: Build & Deploy
 
 on:
   push:
-    branches:
-      - main
-
+    branches: [ main ]
   workflow_dispatch:
 
 permissions:
   contents: write
   pages: write
-  id-token: write
 
 jobs:
   build:
@@ -19,51 +16,23 @@ jobs:
 
     steps:
 
-      # 1. PRENDI IL CODICE
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      # 2. SETUP PYTHON
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      # 3. SET PYTHONPATH
-      - name: Set PYTHONPATH
-        run: echo "PYTHONPATH=$PWD" >> $GITHUB_ENV
+      - name: Install deps
+        run: pip install pyyaml
 
-      # 4. INSTALL DIPENDENZE
-      - name: Install dependencies
-        run: |
-          pip install requests pyyaml python-frontmatter
-
-      # 5. 🧠 AUTOPILOT
-      - name: Run Autopilot
-        run: |
-          python automation/autopilot/autopilot_runner.py
-
-      # 6. 🏗️ BUILD SITE
       - name: Build site
-        run: |
-          python scripts/build_site.py
+        run: python scripts/build_site.py
 
-      # 7. 🌐 GENERATE INDEX
-      - name: Generate index page
-        run: |
-          python scripts/generate_index.py
+      - name: Debug
+        run: ls -R
 
-      # 8. DEBUG OUTPUT
-      - name: Debug output
-        run: |
-          echo "=== ROOT ==="
-          ls -R
-          echo "=== POSTS ==="
-          ls -R _posts || echo "_posts non trovato"
-          echo "=== SITE ==="
-          ls -R _site || echo "_site non trovato"
-
-      # 9. DEPLOY
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
         with:
