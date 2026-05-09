@@ -1,4 +1,3 @@
-import os
 from automation.autopilot.content_planner import ContentPlanner
 from automation.autopilot.frontmatter_generator import FrontmatterGenerator
 
@@ -22,8 +21,8 @@ class AutopilotRunner:
 
         print("📦 PLAN:", plan)
 
-        # 🔥 FALLBACK ROBUSTO
         if not plan:
+
             print("⚠️ Nessun piano generato → fallback attivo")
 
             plan = {
@@ -34,7 +33,6 @@ class AutopilotRunner:
                 "keyword": "imparare una lingua velocemente"
             }
 
-        # 🔥 FIX CRITICO: QUI MANCAVA LA GENERAZIONE FILE
         file_path = self.generator.create_file(plan)
 
         print(f"📄 FILE CREATO: {file_path}")
@@ -42,7 +40,7 @@ class AutopilotRunner:
         return file_path
 
     # -------------------------
-    # BATCH
+    # BATCH (🔥 FIX IMPORTANTE)
     # -------------------------
 
     def run_batch(self, count=5):
@@ -51,8 +49,26 @@ class AutopilotRunner:
 
         plans = self.planner.generate_batch_plan(count)
 
+        print(f"📦 PLANS GENERATI: {len(plans)}")  # 🔥 DEBUG CRITICO
+
+        if not plans:
+            print("❌ NESSUN PLAN GENERATO → STOP PIPELINE")
+            return []
+
         files = self.generator.generate_batch(plans)
 
         print(f"🏁 FILE GENERATI: {len(files)}")
 
         return files
+
+
+# -------------------------
+# ENTRYPOINT (🔥 OBBLIGATORIO)
+# -------------------------
+
+if __name__ == "__main__":
+
+    autopilot = AutopilotRunner()
+
+    # 🔥 scegli UNA sola modalità reale
+    autopilot.run_batch(5)
