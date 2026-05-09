@@ -51,6 +51,11 @@ jobs:
         run: |
           python scripts/build_site.py
 
+          # 6.5 GENERA INDEX
+      - name: Generate index page
+        run: |
+          python scripts/generate_index.py
+
       # 7. DEBUG (VEDI SE FILE ESISTONO)
       - name: Debug output
         run: |
