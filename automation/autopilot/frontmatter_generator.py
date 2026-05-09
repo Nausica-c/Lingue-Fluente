@@ -6,11 +6,14 @@ class FrontmatterGenerator:
 
     def __init__(self, output_dir="_posts"):
 
-        # 🔥 FIX: repo root stabile (NON cwd)
-        self.base_dir = Path(__file__).resolve().parent.parent.parent
+        # 🔥 FIX: usa working directory GitHub Actions (reale)
+        self.base_dir = Path.cwd()
 
         self.output_dir = self.base_dir / output_dir
         self.output_dir.mkdir(parents=True, exist_ok=True)
+
+        print(f"📁 BASE DIR: {self.base_dir}")
+        print(f"📁 OUTPUT DIR: {self.output_dir}")
 
     # -------------------------
     # CREA FRONTMATTER YAML
@@ -57,9 +60,6 @@ automation:
 
         content = frontmatter + "\n# CONTENUTO DA GENERARE CON AI\n"
 
-        # 🔥 DEBUG SERIO
-        print(f"📁 BASE DIR: {self.base_dir}")
-        print(f"📁 OUTPUT DIR: {self.output_dir}")
         print(f"📄 WRITING FILE: {path}")
 
         path.write_text(content, encoding="utf-8")
@@ -67,7 +67,7 @@ automation:
         print(f"✅ FILE SCRITTO: {path}")
         print(f"📂 EXISTS: {path.exists()}")
 
-        return str(path)
+        return path  # 🔥 FIX: ritorna Path, non stringa
 
     # -------------------------
     # CREA BATCH FILES
