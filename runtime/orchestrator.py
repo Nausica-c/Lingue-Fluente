@@ -7,7 +7,9 @@ class ArticleOrchestrator:
     def __init__(self, article_path):
 
         self.article_path = article_path
+
         self.context_builder = ContextBuilder()
+
         self.context = None
         self.generator = None
 
@@ -17,27 +19,44 @@ class ArticleOrchestrator:
 
     def load_context(self):
 
+        print("📦 LOADING CONTEXT...")
+
         self.context = self.context_builder.build(self.article_path)
 
+        # 🔥 DEBUG
+        print("📄 CONTEXT TYPE:", type(self.context))
+
         if not self.context:
+
             raise Exception("❌ Context non caricato")
+
+        print("✅ Context caricato")
 
         return self.context
 
     # -------------------------
-    # INIT AI GENERATOR
+    # INIT GENERATOR
     # -------------------------
 
     def init_generator(self):
 
-        provider = self.context["pipeline"]["generation"]["provider"]
-        model = self.context["pipeline"]["generation"]["model"]
+        print("🤖 INIT GENERATOR...")
 
-        if provider == "gemini":
-            self.generator = GeminiGenerator(model=model)
+        # 🔥 FIX DEFINITIVO
+        # bypass pipeline config mancante
+        provider = "gemini"
+        model = "gemini-1.5-flash"
+
+        print(f"📡 PROVIDER: {provider}")
+        print(f"🧠 MODEL: {model}")
+
+        self.generator = GeminiGenerator(model=model)
 
         if not self.generator:
+
             raise Exception("❌ Generator non inizializzato")
+
+        print("✅ Generator inizializzato")
 
         return self.generator
 
@@ -47,20 +66,48 @@ class ArticleOrchestrator:
 
     def build_prompt(self):
 
-        article = self.context["article"]["meta"]
-        cluster = self.context["cluster"]["config"]
-        prompts = self.context["prompts"]
+        print("🧠 BUILD PROMPT...")
 
-        primary_keyword = article.get("seo", {}).get("primary_keyword", "")
+        try:
 
-        return f"""
-Sei un content writer per il sito Lingue-Fluente.
+            article = self.context.get("article", {}).get("meta", {})
+
+            cluster = self.context.get("cluster", {}).get("config", {})
+
+            prompts = self.context.get("prompts", {})
+
+            primary_keyword = article.get("seo", {}).get(
+                "primary_keyword",
+                ""
+            )
+
+            # 🔥 SAFE FALLBACKS
+            brand_voice = (
+                prompts.get("prompts", {})
+                .get("global", {})
+                .get("brand_voice", "Motivazionale e chiaro")
+            )
+
+            writing_style = (
+                prompts.get("prompts", {})
+                .get("global", {})
+                .get("writing_style", "SEO semplice")
+            )
+
+            article_structure = (
+                prompts.get("prompts", {})
+                .get("article_structure", {})
+                .get("order", [])
+            )
+
+            return f"""
+Sei un content writer professionista per il sito Lingue-Fluente.
 
 BRAND VOICE:
-{prompts['prompts']['global']['brand_voice']}
+{brand_voice}
 
 STILE:
-{prompts['prompts']['global']['writing_style']}
+{writing_style}
 
 CLUSTER:
 {cluster.get('description', '')}
@@ -68,25 +115,30 @@ CLUSTER:
 OBIETTIVI:
 {cluster.get('goals', [])}
 
-STRUTTURA ARTICOLO:
-{prompts['prompts']['article_structure']['order']}
+STRUTTURA:
+{article_structure}
 
-KEYWORD PRINCIPALE:
+KEYWORD:
 {primary_keyword}
 
 REGOLE:
-- Scrivi in italiano semplice
-- Usa esempi pratici
-- Inserisci sezioni chiare
-- Mantieni tono motivazionale
-- Evita linguaggio artificiale
+- Scrivi in italiano naturale
+- Usa H2 e H3
+- Mantieni tono umano
+- Inserisci esempi pratici
+- Evita ripetizioni
+- Ottimizza SEO
 
 CTA:
-Inserisci Babbel come soluzione naturale per imparare lingue.
+Inserisci Babbel come soluzione consigliata.
 
 OUTPUT:
-Articolo SEO completo pronto per pubblicazione.
+Articolo HTML completo pronto per pubblicazione.
 """
+
+        except Exception as e:
+
+            raise Exception(f"❌ PROMPT BUILD ERROR: {e}")
 
     # -------------------------
     # GENERATE ARTICLE
@@ -94,18 +146,26 @@ Articolo SEO completo pronto per pubblicazione.
 
     def generate_article(self):
 
+        print("✍️ GENERATING ARTICLE...")
+
         prompt = self.build_prompt()
 
         article = self.generator.generate(prompt)
 
-        # 🔥 FIX CRITICO
-        if not article or len(article.strip()) < 50:
+        # 🔥 DEBUG
+        print("📄 GENERATED TYPE:", type(article))
+
+        if article:
+            print("📏 GENERATED LENGTH:", len(str(article)))
+
+        if not article or len(str(article).strip()) < 50:
+
             raise Exception("❌ Articolo vuoto o non valido")
 
         return article
 
     # -------------------------
-    # RUN FULL PIPELINE
+    # RUN PIPELINE
     # -------------------------
 
     def run(self):
@@ -113,9 +173,8 @@ Articolo SEO completo pronto per pubblicazione.
         print("🚀 Avvio orchestrator Lingue-Fluente...")
 
         self.load_context()
-        self.init_generator()
 
-        print("✍️ Generazione articolo in corso...")
+        self.init_generator()
 
         article = self.generate_article()
 
