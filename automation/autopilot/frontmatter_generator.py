@@ -6,7 +6,7 @@ class FrontmatterGenerator:
 
     def __init__(self, output_dir="_posts"):
 
-        # 🔥 FIX: usa working directory GitHub Actions (reale)
+        # 🔥 FIX ROBUSTO: supporto GitHub Actions + locale
         self.base_dir = Path.cwd()
 
         self.output_dir = self.base_dir / output_dir
@@ -21,25 +21,32 @@ class FrontmatterGenerator:
 
     def build_frontmatter(self, plan):
 
+        # 🔥 FIX: safe get per evitare KeyError silenziosi
+        title = plan.get("title", "Titolo non disponibile")
+        slug = plan.get("slug", "no-slug")
+        cluster = plan.get("cluster", "general")
+        keyword = plan.get("keyword", "")
+        publish_date = plan.get("publish_date", datetime.now().strftime("%Y-%m-%d"))
+
         return f"""---
 article:
   meta:
     layout: "post"
-    title: "{plan['title']}"
-    slug: "{plan['slug']}"
-    permalink: "/inglese/{plan['cluster']}/{plan['slug']}/"
+    title: "{title}"
+    slug: "{slug}"
+    permalink: "/inglese/{cluster}/{slug}/"
     language: "it"
     target_language: "en"
-    cluster: "{plan['cluster']}"
-    publish_date: "{plan['publish_date']}"
+    cluster: "{cluster}"
+    publish_date: "{publish_date}"
     author: "Lingue-Fluente AI"
     publish: true
     indexed: true
 
 seo:
-  primary_keyword: "{plan['keyword']}"
-  focus_keyword: "{plan['keyword']}"
-  meta_description: "Scopri come migliorare {plan['keyword']} in modo semplice e veloce."
+  primary_keyword: "{keyword}"
+  focus_keyword: "{keyword}"
+  meta_description: "Scopri come migliorare {keyword} in modo semplice e veloce."
 
 automation:
   generated_by: "autopilot"
@@ -54,7 +61,7 @@ automation:
 
         frontmatter = self.build_frontmatter(plan)
 
-        filename = f"{plan['slug']}.md"
+        filename = f"{plan.get('slug', 'no-slug')}.md"
 
         path = self.output_dir / filename
 
@@ -62,12 +69,17 @@ automation:
 
         print(f"📄 WRITING FILE: {path}")
 
-        path.write_text(content, encoding="utf-8")
+        try:
+            path.write_text(content, encoding="utf-8")
+
+        except Exception as e:
+            print(f"❌ ERRORE SCRITTURA FILE {path}: {e}")
+            return None
 
         print(f"✅ FILE SCRITTO: {path}")
         print(f"📂 EXISTS: {path.exists()}")
 
-        return path  # 🔥 FIX: ritorna Path, non stringa
+        return path
 
     # -------------------------
     # CREA BATCH FILES
@@ -77,10 +89,16 @@ automation:
 
         files = []
 
+        if not plans:
+            print("❌ NESSUN PLAN RICEVUTO")
+            return []
+
         for plan in plans:
 
             file_path = self.create_file(plan)
-            files.append(file_path)
+
+            if file_path:
+                files.append(file_path)
 
         print(f"🏁 TOTAL FILES GENERATED: {len(files)}")
 
