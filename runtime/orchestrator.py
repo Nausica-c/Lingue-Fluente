@@ -1,5 +1,5 @@
 from runtime.context_builder import ContextBuilder
-from automation.generators.smart_generator import SmartGenerator
+from automation.generators.local_seo_generator import LocalSEOGenerator
 
 
 class ArticleOrchestrator:
