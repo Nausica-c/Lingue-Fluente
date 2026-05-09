@@ -1,3 +1,4 @@
+from automation.autopilot.content_planner import ContentPlanner
 from automation.autopilot.frontmatter_generator import FrontmatterGenerator
 
 print("🔥 AUTOPILOT RUNNING")
@@ -6,6 +7,7 @@ print("🔥 AUTOPILOT RUNNING")
 class AutopilotRunner:
 
     def __init__(self):
+
         self.planner = ContentPlanner()
         self.generator = FrontmatterGenerator()
 
@@ -15,7 +17,7 @@ class AutopilotRunner:
 
         plans = self.planner.generate_batch_plan(count)
 
-        print(f"📦 PLANS: {len(plans)}")
+        print(f"📦 PLANS GENERATED: {len(plans)}")
 
         files = self.generator.generate_batch(plans)
 
@@ -26,4 +28,6 @@ class AutopilotRunner:
 
 if __name__ == "__main__":
 
-    AutopilotRunner().run_batch(5)
+    runner = AutopilotRunner()
+
+    runner.run_batch(5)
