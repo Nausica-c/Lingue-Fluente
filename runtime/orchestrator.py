@@ -1,5 +1,5 @@
 from runtime.context_builder import ContextBuilder
-from automation.generators.gemini_generator import GeminiGenerator
+from automation.generators.smart_generator import SmartGenerator
 
 
 class ArticleOrchestrator:
@@ -23,40 +23,27 @@ class ArticleOrchestrator:
 
         self.context = self.context_builder.build(self.article_path)
 
-        # 🔥 DEBUG
         print("📄 CONTEXT TYPE:", type(self.context))
 
-        if not self.context:
+        if not isinstance(self.context, dict):
 
-            raise Exception("❌ Context non caricato")
+            raise Exception("❌ Context non valido (non dict)")
 
         print("✅ Context caricato")
 
         return self.context
 
     # -------------------------
-    # INIT GENERATOR
+    # INIT GENERATOR (SMART FIX)
     # -------------------------
 
     def init_generator(self):
 
-        print("🤖 INIT GENERATOR...")
+        print("🤖 INIT SMART GENERATOR...")
 
-        # 🔥 FIX DEFINITIVO
-        # bypass pipeline config mancante
-        provider = "gemini"
-        model = "gemini-1.0-pro"
+        self.generator = SmartGenerator()
 
-        print(f"📡 PROVIDER: {provider}")
-        print(f"🧠 MODEL: {model}")
-
-        self.generator = GeminiGenerator(model=model)
-
-        if not self.generator:
-
-            raise Exception("❌ Generator non inizializzato")
-
-        print("✅ Generator inizializzato")
+        print("✅ SmartGenerator attivo (Groq + fallback)")
 
         return self.generator
 
@@ -71,21 +58,15 @@ class ArticleOrchestrator:
         try:
 
             article = self.context.get("article", {}).get("meta", {})
-
             cluster = self.context.get("cluster", {}).get("config", {})
-
             prompts = self.context.get("prompts", {})
 
-            primary_keyword = article.get("seo", {}).get(
-                "primary_keyword",
-                ""
-            )
+            primary_keyword = article.get("seo", {}).get("primary_keyword", "")
 
-            # 🔥 SAFE FALLBACKS
             brand_voice = (
                 prompts.get("prompts", {})
                 .get("global", {})
-                .get("brand_voice", "Motivazionale e chiaro")
+                .get("brand_voice", "Chiaro e motivazionale")
             )
 
             writing_style = (
@@ -133,12 +114,12 @@ CTA:
 Inserisci Babbel come soluzione consigliata.
 
 OUTPUT:
-Articolo HTML completo pronto per pubblicazione.
+Articolo completo pronto per pubblicazione.
 """
 
         except Exception as e:
 
-            raise Exception(f"❌ PROMPT BUILD ERROR: {e}")
+            raise Exception(f"❌ PROMPT ERROR: {e}")
 
     # -------------------------
     # GENERATE ARTICLE
@@ -152,15 +133,14 @@ Articolo HTML completo pronto per pubblicazione.
 
         article = self.generator.generate(prompt)
 
-        # 🔥 DEBUG
         print("📄 GENERATED TYPE:", type(article))
 
         if article:
-            print("📏 GENERATED LENGTH:", len(str(article)))
+            print("📏 LENGTH:", len(str(article)))
 
         if not article or len(str(article).strip()) < 50:
 
-            raise Exception("❌ Articolo vuoto o non valido")
+            raise Exception("❌ Articolo vuoto o invalido")
 
         return article
 
@@ -170,14 +150,13 @@ Articolo HTML completo pronto per pubblicazione.
 
     def run(self):
 
-        print("🚀 Avvio orchestrator Lingue-Fluente...")
+        print("🚀 START ORCHESTRATOR")
 
         self.load_context()
-
         self.init_generator()
 
         article = self.generate_article()
 
-        print("✅ Articolo generato")
+        print("✅ ARTICLE GENERATED")
 
         return article
