@@ -7,6 +7,11 @@ on:
 
   workflow_dispatch:
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
   build:
 
@@ -29,12 +34,23 @@ jobs:
         run: |
           pip install requests pyyaml python-frontmatter
 
-      # 4. COSTRUISCI IL SITO
+      # 4. 🧠 AUTOPILOT (GENERA ARTICOLI)
+      - name: Run Autopilot
+        run: |
+          python automation/autopilot/autopilot_runner.py
+
+      # 5. 🏗️ COSTRUISCI IL SITO
       - name: Build site
         run: |
           python scripts/build_site.py
 
-      # 5. DEPLOY SU GITHUB PAGES
+      # 6. DEBUG (VEDI SE FILE ESISTONO)
+      - name: Debug output
+        run: |
+          ls -R _posts || echo "_posts non trovato"
+          ls -R _site || echo "_site non trovato"
+
+      # 7. 🌍 DEPLOY SU GITHUB PAGES
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
         with:
