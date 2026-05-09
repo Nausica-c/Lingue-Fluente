@@ -1,8 +1,8 @@
 import sys
 from pathlib import Path
 
-# 🔥 ROOT ROBUSTO (GitHub + locale sempre uguale)
-ROOT_DIR = Path(__file__).resolve().parent.parent
+# 🔥 ROOT ULTRA STABILE (GitHub Actions safe)
+ROOT_DIR = Path.cwd().resolve()
 sys.path.append(str(ROOT_DIR))
 
 from runtime.orchestrator import ArticleOrchestrator
@@ -12,8 +12,8 @@ class SiteBuilder:
 
     def __init__(self):
 
-        # 🔥 FIX: root stabile vero repo
-        self.base_dir = ROOT_DIR
+        # 🔥 FIX: sempre cwd (unica fonte affidabile in Actions)
+        self.base_dir = Path.cwd().resolve()
 
         self.posts_path = self.base_dir / "_posts"
         self.output_path = self.base_dir / "_site"
@@ -31,28 +31,28 @@ class SiteBuilder:
 
     def get_articles(self):
 
-        print("🔍 CHECKING _posts CONTENTS...")
+        print("🔍 SCANNING _posts...")
 
         if not self.posts_path.exists():
             print("❌ _posts NON ESISTE")
             return []
 
-        articles = list(self.posts_path.glob("*.md"))
+        articles = sorted(self.posts_path.glob("*.md"))
 
         print(f"📦 FILES FOUND: {len(articles)}")
 
-        for article in articles:
-            print(f" - {article.name}")
+        for a in articles:
+            print(f" - {a.name}")
 
         return articles
 
     # -------------------------
-    # BUILD SINGLE ARTICLE
+    # BUILD ARTICLE (HARD VALIDATION)
     # -------------------------
 
     def build_article(self, article_path):
 
-        print(f"\n✍️ BUILDING ARTICLE: {article_path.name}")
+        print(f"\n✍️ BUILDING: {article_path.name}")
 
         try:
 
@@ -65,28 +65,31 @@ class SiteBuilder:
 
             content = str(content).strip()
 
-            print("📏 CONTENT LENGTH:", len(content))
+            # 🔥 HARD CHECK (IMPORTANTISSIMO)
+            if len(content) < 100:
+                print("❌ CONTENT TOO SHORT → SKIP")
+                return None
+
+            print(f"📏 LENGTH: {len(content)}")
 
             return content
 
         except Exception as e:
 
-            print(f"❌ BUILD ARTICLE ERROR: {e}")
+            print(f"❌ ORCHESTRATOR FAILED: {article_path.name}")
+            print(f"   → {e}")
+
             return None
 
     # -------------------------
-    # SAVE OUTPUT (FIX HTML OUTPUT)
+    # SAVE OUTPUT
     # -------------------------
 
     def save_article(self, article_path, content):
 
-        try:
+        output_file = self.output_path / f"{article_path.stem}.html"
 
-            # 🔥 FIX: HTML file sempre coerente
-            output_file = self.output_path / f"{article_path.stem}.html"
-
-            # 🔥 FIX: wrapping HTML minimo (evita file “vuoti visivi”)
-            html = f"""<!doctype html>
+        html = f"""<!doctype html>
 <html lang="it">
 <head>
 <meta charset="utf-8">
@@ -97,16 +100,11 @@ class SiteBuilder:
 </body>
 </html>"""
 
-            output_file.write_text(html, encoding="utf-8")
+        output_file.write_text(html, encoding="utf-8")
 
-            print(f"✅ SAVED: {output_file}")
+        print(f"✅ SAVED: {output_file}")
 
-            return output_file
-
-        except Exception as e:
-
-            print(f"❌ SAVE ERROR: {e}")
-            return None
+        return output_file
 
     # -------------------------
     # BUILD SITE
@@ -123,6 +121,7 @@ class SiteBuilder:
             return
 
         built = 0
+        failed = 0
 
         for article in articles:
 
@@ -130,30 +129,27 @@ class SiteBuilder:
 
             if not content:
                 print(f"⚠️ SKIPPED: {article.name}")
+                failed += 1
                 continue
 
-            saved = self.save_article(article, content)
-
-            if saved:
-                built += 1
+            self.save_article(article, content)
+            built += 1
 
         print("\n🏁 BUILD FINISHED")
-        print(f"✅ ARTICLES BUILT: {built}")
+        print(f"✅ BUILT: {built}")
+        print(f"❌ FAILED: {failed}")
 
-        print("\n📂 FINAL _site CONTENTS:")
-
+        # 🔥 FINAL CHECK
         files = list(self.output_path.glob("*"))
 
+        print("\n📂 _site CONTENTS:")
+
         if not files:
-            print("❌ _site È VUOTA")
+            print("❌ _site VUOTA (PROBLEMA ORCHESTRATOR O AI)")
         else:
             for f in files:
                 print(f" - {f.name}")
 
-
-# -------------------------
-# ENTRYPOINT
-# -------------------------
 
 if __name__ == "__main__":
 
