@@ -43,22 +43,17 @@ jobs:
         run: |
           python automation/autopilot/autopilot_runner.py
 
-     # 6.5 GENERA INDEX
-      - name: Generate index page
-        run: |
-          python scripts/generate_index.py # 6. 🏗️ BUILD SITE
+      # 6. 🏗️ BUILD SITE
       - name: Build site
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           python scripts/build_site.py
 
-      # 6.5 GENERATE INDEX (FIXED STEP)
+      # 7. 🌐 GENERATE INDEX
       - name: Generate index page
         run: |
           python scripts/generate_index.py
 
-      # 7. DEBUG OUTPUT
+      # 8. DEBUG OUTPUT
       - name: Debug output
         run: |
           echo "=== ROOT ==="
@@ -68,7 +63,7 @@ jobs:
           echo "=== SITE ==="
           ls -R _site || echo "_site non trovato"
 
-      # 8. DEPLOY
+      # 9. DEPLOY
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
         with:
