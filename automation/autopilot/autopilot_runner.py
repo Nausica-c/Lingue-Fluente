@@ -93,3 +93,7 @@ if __name__ == "__main__":
     autopilot = AutopilotRunner()
 
     autopilot.run_batch(5)
+
+print("📁 POSTS DIR CONTENT:")
+import os
+print(os.listdir("_posts") if os.path.exists("_posts") else "MISSING _posts")
