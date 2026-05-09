@@ -6,7 +6,7 @@ class FrontmatterGenerator:
 
     def __init__(self, output_dir="_posts"):
 
-        # 🔥 FIX ROBUSTO: supporto GitHub Actions + locale
+        # 🔥 ROOT STABILE (GitHub + locale)
         self.base_dir = Path.cwd()
 
         self.output_dir = self.base_dir / output_dir
@@ -16,17 +16,30 @@ class FrontmatterGenerator:
         print(f"📁 OUTPUT DIR: {self.output_dir}")
 
     # -------------------------
-    # CREA FRONTMATTER YAML
+    # SAFE VALUE HELPER
+    # -------------------------
+
+    def safe(self, value, default=""):
+
+        if value is None:
+            return default
+
+        return str(value)
+
+    # -------------------------
+    # FRONTMATTER
     # -------------------------
 
     def build_frontmatter(self, plan):
 
-        # 🔥 FIX: safe get per evitare KeyError silenziosi
-        title = plan.get("title", "Titolo non disponibile")
-        slug = plan.get("slug", "no-slug")
-        cluster = plan.get("cluster", "general")
-        keyword = plan.get("keyword", "")
-        publish_date = plan.get("publish_date", datetime.now().strftime("%Y-%m-%d"))
+        title = self.safe(plan.get("title"), "Titolo non disponibile")
+        slug = self.safe(plan.get("slug"), "no-slug")
+        cluster = self.safe(plan.get("cluster"), "general")
+        keyword = self.safe(plan.get("keyword"), "")
+        publish_date = self.safe(
+            plan.get("publish_date"),
+            datetime.now().strftime("%Y-%m-%d")
+        )
 
         return f"""---
 article:
@@ -54,44 +67,42 @@ automation:
 """
 
     # -------------------------
-    # CREA FILE MARKDOWN
+    # CREATE FILE
     # -------------------------
 
     def create_file(self, plan):
 
-        frontmatter = self.build_frontmatter(plan)
+        if not plan:
+            print("❌ PLAN VUOTO")
+            return None
 
-        filename = f"{plan.get('slug', 'no-slug')}.md"
-
+        slug = plan.get("slug", "no-slug")
+        filename = f"{slug}.md"
         path = self.output_dir / filename
 
-        content = frontmatter + "\n# CONTENUTO DA GENERARE CON AI\n"
+        content = self.build_frontmatter(plan) + "\n# CONTENUTO DA GENERARE CON AI\n"
 
         print(f"📄 WRITING FILE: {path}")
 
         try:
             path.write_text(content, encoding="utf-8")
-
         except Exception as e:
-            print(f"❌ ERRORE SCRITTURA FILE {path}: {e}")
+            print(f"❌ WRITE ERROR: {e}")
             return None
-
-        print(f"✅ FILE SCRITTO: {path}")
-        print(f"📂 EXISTS: {path.exists()}")
 
         return path
 
     # -------------------------
-    # CREA BATCH FILES
+    # BATCH
     # -------------------------
 
     def generate_batch(self, plans):
 
-        files = []
-
         if not plans:
-            print("❌ NESSUN PLAN RICEVUTO")
+            print("❌ NESSUN PLAN")
             return []
+
+        files = []
 
         for plan in plans:
 
@@ -100,6 +111,6 @@ automation:
             if file_path:
                 files.append(file_path)
 
-        print(f"🏁 TOTAL FILES GENERATED: {len(files)}")
+        print(f"🏁 FILES CREATED: {len(files)}")
 
         return files
