@@ -16,23 +16,46 @@ jobs:
 
     steps:
 
+      # 1. CHECKOUT
       - name: Checkout
         uses: actions/checkout@v4
 
+      # 2. PYTHON
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
+      # 3. DEPENDENZE MINIME
       - name: Install deps
-        run: pip install pyyaml
+        run: |
+          pip install pyyaml requests
 
+      # 4. 🔥 AUTOPILOT (MANCAVA)
+      - name: Run Autopilot
+        run: |
+          python automation/autopilot/autopilot_runner.py
+
+      # 5. DEBUG POSTS (CRITICO)
+      - name: Debug _posts
+        run: |
+          echo "=== POSTS ==="
+          ls -R _posts || echo "_posts non trovato"
+
+      # 6. BUILD SITE
       - name: Build site
-        run: python scripts/build_site.py
+        run: |
+          python scripts/build_site.py
 
-      - name: Debug
-        run: ls -R
+      # 7. DEBUG OUTPUT
+      - name: Debug output
+        run: |
+          echo "=== ROOT ==="
+          ls -R
+          echo "=== SITE ==="
+          ls -R _site || echo "_site vuoto"
 
+      # 8. DEPLOY
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
         with:
