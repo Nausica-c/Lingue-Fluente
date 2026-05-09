@@ -1,8 +1,8 @@
 import sys
 from pathlib import Path
 
-# 🔥 ROOT STABILE PER GITHUB ACTIONS
-ROOT_DIR = Path.cwd().resolve()
+# 🔥 ROOT ROBUSTO (GitHub + locale sempre uguale)
+ROOT_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(ROOT_DIR))
 
 from runtime.orchestrator import ArticleOrchestrator
@@ -12,17 +12,15 @@ class SiteBuilder:
 
     def __init__(self):
 
-        # 🔥 DIRECTORY PRINCIPALI
+        # 🔥 FIX: root stabile vero repo
         self.base_dir = ROOT_DIR
 
         self.posts_path = self.base_dir / "_posts"
         self.output_path = self.base_dir / "_site"
 
-        # 🔥 CREA _site SEMPRE
         self.output_path.mkdir(parents=True, exist_ok=True)
 
         print("🚀 SITE BUILDER INIT")
-
         print(f"📍 BASE DIR: {self.base_dir}")
         print(f"📁 POSTS PATH: {self.posts_path}")
         print(f"📁 SITE PATH: {self.output_path}")
@@ -36,7 +34,6 @@ class SiteBuilder:
         print("🔍 CHECKING _posts CONTENTS...")
 
         if not self.posts_path.exists():
-
             print("❌ _posts NON ESISTE")
             return []
 
@@ -60,20 +57,15 @@ class SiteBuilder:
         try:
 
             orchestrator = ArticleOrchestrator(article_path)
-
             content = orchestrator.run()
 
-            # 🔥 DEBUG CONTENUTO
-            print("📄 CONTENT TYPE:", type(content))
-
-            if content:
-
-                print("📏 CONTENT LENGTH:", len(str(content)))
-
-            else:
-
-                print("❌ CONTENT IS EMPTY")
+            if not content:
+                print("❌ EMPTY CONTENT")
                 return None
+
+            content = str(content).strip()
+
+            print("📏 CONTENT LENGTH:", len(content))
 
             return content
 
@@ -83,16 +75,29 @@ class SiteBuilder:
             return None
 
     # -------------------------
-    # SAVE OUTPUT
+    # SAVE OUTPUT (FIX HTML OUTPUT)
     # -------------------------
 
     def save_article(self, article_path, content):
 
         try:
 
+            # 🔥 FIX: HTML file sempre coerente
             output_file = self.output_path / f"{article_path.stem}.html"
 
-            output_file.write_text(str(content), encoding="utf-8")
+            # 🔥 FIX: wrapping HTML minimo (evita file “vuoti visivi”)
+            html = f"""<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>{article_path.stem}</title>
+</head>
+<body>
+{content}
+</body>
+</html>"""
+
+            output_file.write_text(html, encoding="utf-8")
 
             print(f"✅ SAVED: {output_file}")
 
@@ -104,7 +109,7 @@ class SiteBuilder:
             return None
 
     # -------------------------
-    # BUILD FULL SITE
+    # BUILD SITE
     # -------------------------
 
     def build(self):
@@ -114,7 +119,6 @@ class SiteBuilder:
         articles = self.get_articles()
 
         if not articles:
-
             print("❌ NO ARTICLES FOUND")
             return
 
@@ -125,7 +129,6 @@ class SiteBuilder:
             content = self.build_article(article)
 
             if not content:
-
                 print(f"⚠️ SKIPPED: {article.name}")
                 continue
 
@@ -137,17 +140,13 @@ class SiteBuilder:
         print("\n🏁 BUILD FINISHED")
         print(f"✅ ARTICLES BUILT: {built}")
 
-        # 🔥 DEBUG FINALE
         print("\n📂 FINAL _site CONTENTS:")
 
         files = list(self.output_path.glob("*"))
 
         if not files:
-
             print("❌ _site È VUOTA")
-
         else:
-
             for f in files:
                 print(f" - {f.name}")
 
@@ -158,6 +157,4 @@ class SiteBuilder:
 
 if __name__ == "__main__":
 
-    builder = SiteBuilder()
-
-    builder.build()
+    SiteBuilder().build()
