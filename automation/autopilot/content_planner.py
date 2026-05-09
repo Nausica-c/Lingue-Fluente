@@ -1,38 +1,32 @@
-import random
-from datetime import datetime, timedelta
-from automation.autopilot.keyword_engine import KeywordEngine
+from automation.autopilot.content_planner import ContentPlanner
+from automation.autopilot.frontmatter_generator import FrontmatterGenerator
 
 
-class ContentPlanner:
+print("🔥 AUTOPILOT RUNNING")
+
+
+class AutopilotRunner:
 
     def __init__(self):
 
-        self.engine = KeywordEngine()
+        self.planner = ContentPlanner()
+        self.generator = FrontmatterGenerator()
 
-        self.clusters = [
-            "beginner",
-            "metodo",
-            "vocabolario",
-            "viaggio",
-            "business"
-        ]
+    def run_batch(self, count=5):
 
-    def pick_cluster(self):
-        return random.choice(self.clusters)
+        print(f"🚀 GENERATING {count} ARTICLES")
 
-    def create_plan(self):
+        plans = self.planner.generate_batch_plan(count)
 
-        cluster = self.pick_cluster()
-        idea = self.engine.generate_idea(cluster)
+        print(f"📦 PLANS: {len(plans)}")
 
-        return {
-            "cluster": cluster,
-            "keyword": idea["keyword"],
-            "title": idea["title"],
-            "slug": idea["slug"],
-            "publish_date": datetime.now().strftime("%Y-%m-%d")
-        }
+        files = self.generator.generate_batch(plans)
 
-    def generate_batch_plan(self, count=5):
+        print(f"🏁 FILES CREATED: {len(files)}")
 
-        return [self.create_plan() for _ in range(count)]
+        return files
+
+
+if __name__ == "__main__":
+
+    AutopilotRunner().run_batch(5)
