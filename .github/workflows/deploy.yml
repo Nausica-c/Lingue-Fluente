@@ -46,8 +46,10 @@ jobs:
 
       # 6. 🏗️ COSTRUISCI IL SITO
       - name: Build site
-        run: |
-          python scripts/build_site.py
+  env:
+    GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+  run: |
+    python scripts/build_site.py
 
       # 7. DEBUG (VEDI SE FILE ESISTONO)
       - name: Debug output
