@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 from datetime import datetime
 
 
@@ -6,11 +6,11 @@ class FrontmatterGenerator:
 
     def __init__(self, output_dir="_posts"):
 
-        # 🔥 FIX: forza path assoluto stabile su GitHub Actions
-        self.base_dir = os.getcwd()
-        self.output_dir = os.path.join(self.base_dir, output_dir)
+        # 🔥 FIX: repo root stabile (NON cwd)
+        self.base_dir = Path(__file__).resolve().parent.parent.parent
 
-        os.makedirs(self.output_dir, exist_ok=True)
+        self.output_dir = self.base_dir / output_dir
+        self.output_dir.mkdir(parents=True, exist_ok=True)
 
     # -------------------------
     # CREA FRONTMATTER YAML
@@ -53,21 +53,21 @@ automation:
 
         filename = f"{plan['slug']}.md"
 
-        path = os.path.join(self.output_dir, filename)
+        path = self.output_dir / filename
 
         content = frontmatter + "\n# CONTENUTO DA GENERARE CON AI\n"
 
-        # 🔥 DEBUG CRITICO
-        print(f"📁 WRITING FILE IN: {path}")
-        print(f"📂 EXISTS BEFORE: {os.path.exists(path)}")
+        # 🔥 DEBUG SERIO
+        print(f"📁 BASE DIR: {self.base_dir}")
+        print(f"📁 OUTPUT DIR: {self.output_dir}")
+        print(f"📄 WRITING FILE: {path}")
 
-        with open(path, "w", encoding="utf-8") as f:
-            f.write(content)
+        path.write_text(content, encoding="utf-8")
 
-        print(f"📄 FILE SCRITTO: {path}")
-        print(f"📂 EXISTS AFTER: {os.path.exists(path)}")
+        print(f"✅ FILE SCRITTO: {path}")
+        print(f"📂 EXISTS: {path.exists()}")
 
-        return path
+        return str(path)
 
     # -------------------------
     # CREA BATCH FILES
@@ -80,7 +80,6 @@ automation:
         for plan in plans:
 
             file_path = self.create_file(plan)
-
             files.append(file_path)
 
         print(f"🏁 TOTAL FILES GENERATED: {len(files)}")
