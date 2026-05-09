@@ -1,3 +1,4 @@
+print("🔥 AUTOPILOT RUNNING")
 from automation.autopilot.content_planner import ContentPlanner
 from automation.autopilot.frontmatter_generator import FrontmatterGenerator
 
