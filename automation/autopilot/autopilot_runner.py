@@ -1,3 +1,7 @@
+import os
+
+os.makedirs("_posts", exist_ok=True)
+
 from automation.autopilot.content_planner import ContentPlanner
 from automation.autopilot.frontmatter_generator import FrontmatterGenerator
 
