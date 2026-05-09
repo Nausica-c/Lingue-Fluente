@@ -5,6 +5,7 @@ from automation.generators.gemini_generator import GeminiGenerator
 class ArticleOrchestrator:
 
     def __init__(self, article_path):
+
         self.article_path = article_path
         self.context_builder = ContextBuilder()
         self.context = None
@@ -17,6 +18,9 @@ class ArticleOrchestrator:
     def load_context(self):
 
         self.context = self.context_builder.build(self.article_path)
+
+        if not self.context:
+            raise Exception("❌ Context non caricato")
 
         return self.context
 
@@ -32,6 +36,9 @@ class ArticleOrchestrator:
         if provider == "gemini":
             self.generator = GeminiGenerator(model=model)
 
+        if not self.generator:
+            raise Exception("❌ Generator non inizializzato")
+
         return self.generator
 
     # -------------------------
@@ -46,7 +53,7 @@ class ArticleOrchestrator:
 
         primary_keyword = article.get("seo", {}).get("primary_keyword", "")
 
-        prompt = f"""
+        return f"""
 Sei un content writer per il sito Lingue-Fluente.
 
 BRAND VOICE:
@@ -75,13 +82,11 @@ REGOLE:
 - Evita linguaggio artificiale
 
 CTA:
-Inserisci in modo naturale Babbel come soluzione per imparare lingue.
+Inserisci Babbel come soluzione naturale per imparare lingue.
 
 OUTPUT:
 Articolo SEO completo pronto per pubblicazione.
 """
-
-        return prompt
 
     # -------------------------
     # GENERATE ARTICLE
@@ -92,6 +97,10 @@ Articolo SEO completo pronto per pubblicazione.
         prompt = self.build_prompt()
 
         article = self.generator.generate(prompt)
+
+        # 🔥 FIX CRITICO
+        if not article or len(article.strip()) < 50:
+            raise Exception("❌ Articolo vuoto o non valido")
 
         return article
 
@@ -104,7 +113,6 @@ Articolo SEO completo pronto per pubblicazione.
         print("🚀 Avvio orchestrator Lingue-Fluente...")
 
         self.load_context()
-
         self.init_generator()
 
         print("✍️ Generazione articolo in corso...")
