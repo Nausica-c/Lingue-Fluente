@@ -1,0 +1,47 @@
+site:
+  name: "Lingue-Fluente"
+
+  url: "https://nausica-c.github.io/Lingue-Fluente"
+
+  language: "it"
+
+  timezone: "Europe/Rome"
+
+  description: >
+    Sistema automatico per imparare lingue,
+    generare contenuti SEO e monetizzare con affiliate marketing.
+
+branding:
+  logo: "/assets/img/logo.png"
+
+  primary_color: "#2563eb"
+
+  font: "Inter"
+
+seo:
+  default_title_separator: "|"
+
+  default_meta_description: >
+    Impara lingue più velocemente con metodi pratici,
+    immersione linguistica e strumenti AI.
+
+  default_image: "/assets/img/cover.jpg"
+
+affiliate:
+  default_offer: "babbel"
+
+distribution:
+  pinterest: true
+
+  rss: true
+
+  newsletter: true
+
+automation:
+  auto_internal_links: true
+
+  auto_schema: true
+
+  auto_cta: true
+
+  auto_related_posts: true
